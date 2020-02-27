@@ -22,3 +22,7 @@ li a {
 li a:hover {
   background-color: #111;
 }
+/* Change the active page's link to that color */
+.active {
+  background-color: #4CAF50;
+}
