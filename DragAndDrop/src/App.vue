@@ -2,7 +2,8 @@
   <div id="app">
     <main class="flexbox">
 
-      
+      <button v-on:click="counter += 1">+ Add a card</button>
+
       <Board id = "board-1">
         <h1 style="color: white; font-size:30px; text-align: center">TO DO</h1>
         <Card id = "card-1" draggable = "true">
@@ -23,9 +24,11 @@
           <p> Card Two </p>
         </Card>
       </Board>
+
       
 
     </main>
+   
   </div>
 </template>
 
@@ -59,7 +62,7 @@ body {
   justify-content: space-between;
 
   width: 100%;
-  max-width: 1000px;
+  max-width: 1200px;
   height: 100vh;
 
   overflow: hidden;
