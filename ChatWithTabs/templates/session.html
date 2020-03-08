@@ -102,7 +102,10 @@
           <input type="submit"/>
         </form>
     </div>
-    
+    <!-- 
+      creates a variable to keep track of current page. not ideal solution but works. Defaults to Team
+       -->
+    <script type="text" id="current_page">Team</script>
     <!-- 
       function to switch between tabs. Might be possible to 'mark' the current tab in someway to use for id
       Status: Working
@@ -121,7 +124,8 @@
         }
         document.getElementById(user_id).style.display = "block";
         evt.currentTarget.className += " active";
-        console.log(evt.currentTarget);
+        document.getElementById("current_page").innerText = evt.currentTarget.innerText;
+        console.log(document.getElementById("current_page").innerText)
       }
     </script>
     
@@ -145,7 +149,7 @@
           console.log(form.attr("parent_id"));
           //hardcoded username
           let user_name = "Kevin"
-          let id = form.attr("parent_id")
+          let id = document.getElementById("current_page").innerText
           let user_input = $( 'input.message' ).val()
           // HERE! 
           // Better solution likely is to use socket.emit( 'private_message', {payload}) or change 'my_event' to specify a room
