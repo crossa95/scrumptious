@@ -1,0 +1,5 @@
+flask
+flask-mysqldb
+pyyaml
+mysql-connector
+vue
