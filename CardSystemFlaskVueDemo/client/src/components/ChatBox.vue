@@ -2,8 +2,7 @@
     <div id="chat">
         <ul id="chatbox">
             <ChatMessage
-                v-for = "message in messages"
-                v-if = "message.channel === chatID"
+                v-for = "message in filterMessages"
                 :key = "message.id"
                 :message = "message"
             ></ChatMessage>
@@ -38,6 +37,16 @@ export default {
             sendMessage: function () {          
                 this.$emit("newMsg", {channel: this.chatID, content: this.message});               
                 this.message = '';
+            }
+        },
+        computed: {
+            filterMessages() {
+                let chatID = this.chatID;
+                let messages = this.messages;
+                let newArray = messages.filter(function (message) {
+                    return message.channel == chatID;
+                })
+                return newArray;
             }
         }
     };
