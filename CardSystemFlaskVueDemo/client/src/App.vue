@@ -4,6 +4,7 @@
       <router-link to="/manage">Project Manager</router-link> |
       <router-link to="/user">User</router-link> |
       <router-link to="/about">About</router-link>
+      <router-link to="/home">Home</router-link>
     </div>
     <router-view />
   </div>
