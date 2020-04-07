@@ -1,15 +1,16 @@
 <template>
   <div class="backlog">
     <main class="flexbox">
-    
       <Board id = "board-1">
         <h1 style="color: white; font-size:30px; text-align: center">Backlog</h1>
-        <Card id = "card-1" draggable = "true">
-          <p> Card One </p>
+        <!-- <b-button @click.prevent="newCard"> + </b-button> -->
+        <Card id = "card-B1" draggable = "true" :title="'Card 1'">
+          {{ details }}
         </Card>
+        <!-- <Card id="card-B" draggable = "true" v-for="i in cards" :key="'dyn-tab-' +i" :title="'Card ' + i">
+          {{ details }}
+        </Card> -->
       </Board>
-      
-
     </main>
   </div>
 </template>
@@ -20,12 +21,23 @@ import Card from '@/components/Card';
 export default {
   name: 'BackLog',
   props: {
-    
+    details: String
   },
   components:{
     Board,
     Card
-  }
+  },
+  // data(){
+  //   return{
+  //     cards:[],
+  //     cardCounter:2
+  //   }
+  // },
+  // methods:{
+  //   newCard(){
+  //     this.cards.push(this.tabCounter++);
+  //   }
+  // }
 }
 </script>
 

@@ -3,17 +3,17 @@
     <b-card no-body>
       <b-tabs card>
         <b-tab title="Backlog">
-          <BackLog />
+          <BackLog details="This is the BackLog"/>
         </b-tab>
         <b-tab title="Trash">
-          <Trash />
+          <Trash trash="This is the Trash"/>
         </b-tab>
         <b-tab title="Sprint 1">
-          <Sprints />
+          <Sprints todo="The ToDo Column" inprogress="The In-Progress Column" done="The Done Column"/>
         </b-tab>
         <b-tab v-for="i in tabs" :key="'dyn-tab-' + i" :title="'Sprint ' + i">
           <b-button size="sm" variant="danger" class="float-right" @click="closeTab(i)">
-            Close Tab
+            Delete Tab
           </b-button>
           <Sprints />
         </b-tab>

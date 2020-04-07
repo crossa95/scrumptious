@@ -13,9 +13,7 @@
     </div>
     <div v-if="currentTab == 2">
       <CardSystem msg="Card Board"/>
-    </div>
-    
-    
+    </div>    
   </div>
 </template>
 <script>

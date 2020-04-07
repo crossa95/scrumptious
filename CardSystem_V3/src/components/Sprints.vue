@@ -4,22 +4,22 @@
     
       <Board id = "board-1">
         <h1 style="color: white; font-size:30px; text-align: center">TO DO</h1>
-        <Card id = "card-1" draggable = "true">
-          <p> Card One </p>
+        <Card id = "card-S1" draggable = "true">
+          {{ todo }}
         </Card>
       </Board>
 
       <Board id = "board-2">
         <h1 style="color: white; font-size:30px; text-align: center">IN PROGRESS</h1>
-        <Card id = "card-2" draggable = "true">
-          <p> Card Two </p>
+        <Card id = "card-S2" draggable = "true">
+          {{ inprogress }}
         </Card>
       </Board>
 
       <Board id = "board-3">
         <h1 style="color: white; font-size:30px; text-align: center">DONE</h1>
-        <Card id = "card-3" draggable = "true">
-          <p> Card Three </p>
+        <Card id = "card-S3" draggable = "true">
+          {{ done }}
         </Card>
       </Board>
       
@@ -34,7 +34,9 @@ import Card from '@/components/Card';
 export default {
   name: 'Sprint',
   props: {
-    
+    todo: String,
+    inprogress: String,
+    done: String
   },
   components:{
     Board,

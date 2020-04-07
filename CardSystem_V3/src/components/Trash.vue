@@ -4,8 +4,8 @@
     
       <Board id = "board-1">
         <h1 style="color: white; font-size:30px; text-align: center">Trash</h1>
-        <Card id = "card-1" draggable = "true">
-          <p> Card One </p>
+        <Card id = "card-T1" draggable = "true">
+          {{ trash }}
         </Card>
       </Board>
       
@@ -20,7 +20,7 @@ import Card from '@/components/Card';
 export default {
   name: 'Trash',
   props: {
-    
+    trash: String
   },
   components:{
     Board,
