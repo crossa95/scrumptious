@@ -4,18 +4,38 @@
 {% block title %} {{ project.title }} {% endblock title %}
 
 {% block content %}
+
 <h4> {{ project.title }} </h4>
-<p>{{backlog}}</p>
-<a class="mr-2" href="#">{{ project.author.username }}</a>
+
 <small class = "text-muted"> Created on {{ project.date_posted.strftime('%Y-%m-%d') }}</small>
 <div>
 <p> <strong>Description:</strong> {{project.description}} </p>
-{% if project.author == current_user %}
+
+
+
 <div class="text-right">
-    <a class="btn btn-secondary btn-sm m-20" href="{{url_for('update_project', project_id = project.id) }}" > <i class="fas fa-edit"></i></a>
+
+    <a class="btn btn-secondary btn-sm m-20" href="{{url_for('update_project', project_id = project.id, username=current_user.username)}}" > <i class="fas fa-edit"></i></a>
     <button type = "button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal"><i class="fas fa-trash"></i></button>
 </div>
-{% endif %}
+
+{% for username in usernames%}
+<style>
+    .avatar {
+      vertical-align: middle;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+    }
+    </style>
+
+<ul>
+
+    <li><img class="avatar" alt="user_image" src="{{ url_for('static', filename='profile_pics/' + 'default.jpg') }}"> {{ username.username }}</li>
+</ul>
+{% endfor %}
+
+<a href="{{ url_for('invite', project_id=project.id, username=current_user.username)}}"><button type="button" class="btn btn-primary btn-lg">Invite Member</button></a>
     <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -30,7 +50,7 @@
             </div>
             <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <form action="{{url_for('delete_project', project_id=project.id)}}" method="POST">
+            <form action="{{url_for('delete_project', project_id=project.id, username=current_user.username)}}" method="POST">
                 <input class = "btn btn-danger" type="submit" value ="Delete">
             </form>
             </div>
@@ -41,7 +61,7 @@
 </div>
 <hr></hr>
     <br>
-    <a href="{{ url_for('create_card', project_id=project.id)}}"><button type="button" class="btn btn-primary btn-lg">Create a new card</button></a>
+    <a href="{{ url_for('create_card', project_id=project.id, username=current_user.username)}}"><button type="button" class="btn btn-primary btn-lg">Create a new card</button></a>
     <!-- Pill tabs -->
     <ul class="nav nav-pills" role="tablist">
       <li class="nav-item">
@@ -75,7 +95,7 @@
                         <div class = "list border border-dark rounded">
                             <h4 style="text-align:center">Backlog</h4>
                             {% for backlog in backlogs%}
-                            <div class = "list-item" draggable = "true">{{ backlog.description }}</div>
+                            <div class = "list-item" draggable = "true">{{ backlog.description }} </div>
                             {% endfor %}
                         </div>
                         <div class = "list">

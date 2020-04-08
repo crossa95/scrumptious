@@ -3,8 +3,9 @@
 {% block content %}
 <div id = "main-section">
     <!-- Chat Selection -->
+
     <nav id = "sidebar">
-        <h4>ROOMS</h4>
+        <h4>CHANNELS</h4>
         {% for room in rooms %}
             <p class = "select-room"> {{ room|title }} </p>
         {% endfor %}
@@ -14,6 +15,15 @@
 
     <div id = "rightside-panel">
         <div id="display-message-section">
+
+            {% for message in messages %}
+                <p class = my-msg>
+                    <span class = my-username>{{message.username}}</span>
+                    <br></br>
+                    <span> {{ message.message }} </span>
+                </p>
+            {% endfor %}
+
         </div>
         <!-- Input Message -->
         <div id = "input-area">

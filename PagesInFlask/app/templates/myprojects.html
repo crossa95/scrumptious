@@ -5,7 +5,7 @@
 {% block content %}
 
   <h1>List of Projects by {{ user.username }}</h1>
-  <a href="{{ url_for('create_project')}}"><button type="button" class="btn btn-primary btn-lg">Create a New Project</button></a>
+  <a href="{{ url_for('create_project', username=current_user.username)}}"><button type="button" class="btn btn-primary btn-lg">Create a New Project</button></a>
   <div class="container">
     <div class="row">
       {% for project in projects %}
@@ -14,10 +14,10 @@
           <img class="card-img-top" src="{{url_for('static', filename='project_pics/default.jpg')}}" alt="Card image">
           <div class="card-body">
             <h4 class="card-title"> {{ project.title }} </h4>
-            <a class="mr-2" href="{{ url_for('user_projects', username=project.author.username) }}">{{ project.author.username }}</a>
+
             <small class = "text-muted"> Created on {{ project.date_posted.strftime('%Y-%m-%d') }}</small>
             <p class="card-text">   {{ project.description }} </p>
-            <a href="{{ url_for('project', project_id=project.id)}}" class="btn btn-primary">Go to Project</a>
+            <a href="{{ url_for('project', project_id=project.id, username=current_user.username)}}" class="btn btn-primary">Go to Project</a>
           </div>
         </div>
       </div>

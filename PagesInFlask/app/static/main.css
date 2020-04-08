@@ -270,14 +270,13 @@ input[type=text]:focus{
 }
 
 .others-msg {
-  margin-right:7em;
-  margin-left: 1em;
+  margin-left:7em;
+  margin-right:1em;
   padding: 0.5em 0.5em 0.5em 1em;
   border-radius: 5px;
-  border-color: grey;
-  border-width: 0.5px;
+  border-color: #206ED2;
+  border-width: 1px;
   border-style: solid;
-  background-color: #C2DBFB;
   /* animation */
   animation-name: fadeIn;
   animation-duration: 0.75s;
@@ -332,4 +331,11 @@ input[type=text]:focus{
 
 #get-username {
   display: none !important;
+}
+
+.avatar {
+  vertical-align: middle;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
 }

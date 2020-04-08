@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         socket.emit('join', {'username': username, 'room': room})
 
         // Clear message area
-        document.querySelector('#display-message-section').innerHTML = ''
+        //document.querySelector('#display-message-section').innerHTML = ''
 
         //autofocus on textbox
         document.querySelector('#user_message').focus()
