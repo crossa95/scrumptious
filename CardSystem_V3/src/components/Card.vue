@@ -13,7 +13,7 @@
 
 <script>
 export default {
-    props: ['id', 'draggable'],
+    props: ['id', 'draggable', 'location'],
     methods: {
         dragStart: e => {
             const target = e.target;

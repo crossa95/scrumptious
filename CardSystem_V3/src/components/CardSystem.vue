@@ -1,27 +1,35 @@
 <template>
-  <div class="cardSystem">
+<div class="Wrapper">
+
+<div class="Backlog">
+          <BackLog />
+</div>
+<div class="cardSystem">
     <b-card no-body>
       <b-tabs card>
-        <b-tab title="Backlog">
-          <BackLog details="This is the BackLog"/>
-        </b-tab>
+
         <b-tab title="Trash">
-          <Trash trash="This is the Trash"/>
+          <Trash />
         </b-tab>
+
         <b-tab title="Sprint 1">
-          <Sprints todo="The ToDo Column" inprogress="The In-Progress Column" done="The Done Column"/>
+          <Sprints />
         </b-tab>
+        
         <b-tab v-for="i in tabs" :key="'dyn-tab-' + i" :title="'Sprint ' + i">
           <b-button size="sm" variant="danger" class="float-right" @click="closeTab(i)">
-            Delete Tab
+            Close Tab
           </b-button>
           <Sprints />
         </b-tab>
+
         <template v-slot:tabs-end>
           <b-nav-item @click.prevent="newTab" href="#"><b>+</b></b-nav-item>
         </template>
       </b-tabs>
+      
     </b-card>
+  </div>
   </div>
 </template>
 
@@ -65,17 +73,21 @@ export default {
 </script>
 
 <style lang="css">
-  * {
-    margin: 0;
-    padding: 0;
-    font-family: 'Karla', sans-serif;
-  }
-  .cardSystem {
-    width: 100%;
+  .Backlog {
+    width: 30%;
     min-height: 100vh;
     background-color: #f8f8f8;
     margin: 10px;
     padding: 20px;
+    float:left;
+  }
+  .cardSystem {
+    width: 65%;
+    min-height: 100vh;
+    background-color: #f8f8f8;
+    margin: 10px;
+    padding: 20px;
+    float:right;
   }
 
 </style>

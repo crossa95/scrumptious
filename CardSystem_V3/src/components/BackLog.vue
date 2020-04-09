@@ -1,15 +1,16 @@
 <template>
   <div class="backlog">
     <main class="flexbox">
-      <Board id = "board-1">
+    <b-button size="sm" variant="primary" class="float-right" @click="newCard()">
+            Create Card
+          </b-button>
+      <Board id = "backlogBoard">
         <h1 style="color: white; font-size:30px; text-align: center">Backlog</h1>
-        <!-- <b-button @click.prevent="newCard"> + </b-button> -->
-        <Card id = "card-B1" draggable = "true" :title="'Card 1'">
-          {{ details }}
+
+        <Card v-for="i in cards" :key="i.title" :id="i.title" :draggable="true" >
+            {{i.content}}
         </Card>
-        <!-- <Card id="card-B" draggable = "true" v-for="i in cards" :key="'dyn-tab-' +i" :title="'Card ' + i">
-          {{ details }}
-        </Card> -->
+        
       </Board>
     </main>
   </div>
@@ -21,23 +22,27 @@ import Card from '@/components/Card';
 export default {
   name: 'BackLog',
   props: {
-    details: String
+    
   },
   components:{
-    Board,
-    Card
+    Board
+    ,Card
   },
-  // data(){
-  //   return{
-  //     cards:[],
-  //     cardCounter:2
-  //   }
-  // },
-  // methods:{
-  //   newCard(){
-  //     this.cards.push(this.tabCounter++);
-  //   }
-  // }
+  data () {
+    return {
+      cards:[],
+      cardsCounter:0
+    }
+  },
+  methods: {
+    newCard(){
+      var cardText = prompt("What should the card say?");
+      var newCard = {title:"card" + this.cardsCounter, content: cardText};
+      this.cardsCounter++;
+      this.cards.push(newCard);
+      
+    } 
+    }
 }
 </script>
 
