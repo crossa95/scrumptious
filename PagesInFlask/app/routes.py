@@ -158,7 +158,7 @@ def user_projects(username):
 
 @app.route("/user/<string:username>/myprojects/project/<int:project_id>")
 @login_required
-def project(project_id,username):
+def project(project_id,username,methods=['GET', 'POST']):
     # I am getting the particular project that the user has clicked on to go to using the project ID that is being passed into it
     # I then comunicate with the db and get all the users that have a relationship with this project ONLY and assign them into members
     # If the user who is trying to connect to the page is not part of it, they will receive a 403 page error telling them they
@@ -185,7 +185,7 @@ def project(project_id,username):
         user= User.query.get(var.id)
         usernames.append(user)
 
-    return render_template('project.html', title=project.title, project=project, backlogs = backlogs, incompletes = incompletes, completes = completes, members=members, usernames = usernames)
+    return render_template('project.html', title=project.title, project=project, backlogs = backlogs, incompletes = incompletes, completes = completes, members=members, usernames = usernames,username = current_user.username, rooms = ROOMS)
 
 @app.route("/user/<string:username>/myprojects/project/<int:project_id>/update", methods=['GET', 'POST'])
 @login_required
