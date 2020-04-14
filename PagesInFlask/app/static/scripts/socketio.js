@@ -1,5 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
-    var socket = io();
+var socket = io();
+document.addEventListener('DOMContentLoaded', () => {    
 
     // retrive username
     const username = document.querySelector('#get-username').innerHTML;
@@ -105,4 +105,21 @@ document.addEventListener('DOMContentLoaded', () => {
         p.innerHTML = msg;
         document.querySelector('#display-message-section').append(p);
     }
+
+    /* socket.on('cardDragStart', data => {
+        id = data;        
+    }) */
+
+})
+
+socket.on('cardDragging', data  => {        
+    var element = document.getElementById(data);
+    element.style.opacity = 0.2;
+})
+
+socket.on('cardDrop', data => {        
+    var element = document.getElementById(data.id);
+    element.style.opacity = 1.0;
+    document.getElementById(data.parent).append(element);
+    
 })

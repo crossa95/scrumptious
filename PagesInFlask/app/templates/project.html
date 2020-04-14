@@ -6,145 +6,197 @@
 {% block content %}
 
 <h4> {{ project.title }} </h4>
-
 <small class = "text-muted"> Created on {{ project.date_posted.strftime('%Y-%m-%d') }}</small>
 <div>
-<p> <strong>Description:</strong> {{project.description}} </p>
-
-
-
-<div class="text-right">
-
-    <a class="btn btn-secondary btn-sm m-20" href="{{url_for('update_project', project_id = project.id, username=current_user.username)}}" > <i class="fas fa-edit"></i></a>
-    <button type = "button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal"><i class="fas fa-trash"></i></button>
+    <p> <strong>Description:</strong> {{project.description}} </p>
+    <div class="text-right">
+        <a class="btn btn-secondary btn-sm m-20" href="{{url_for('update_project', project_id = project.id, username=current_user.username)}}" > <i class="fas fa-edit"></i></a>
+        <button type = "button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal"><i class="fas fa-trash"></i></button>
+    </div>
 </div>
 
-{% for username in usernames%}
-<style>
-    .avatar {
-      vertical-align: middle;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-    }
-    </style>
-
-<ul>
-
-    <li><img class="avatar" alt="user_image" src="{{ url_for('static', filename='profile_pics/' + 'default.jpg') }}"> {{ username.username }}</li>
-</ul>
-{% endfor %}
-
-<a href="{{ url_for('invite', project_id=project.id, username=current_user.username)}}"><button type="button" class="btn btn-primary btn-lg">Invite Member</button></a>
-    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-            <h5 class="modal-title" id="deleteModalLabel">Delete Project?</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+                <h5 class="modal-title" id="deleteModalLabel">Delete Project?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
-            Are you sure you want to delete this project? You will not be able to undo this.
+                Are you sure you want to delete this project? You will not be able to undo this.
             </div>
             <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <form action="{{url_for('delete_project', project_id=project.id, username=current_user.username)}}" method="POST">
-                <input class = "btn btn-danger" type="submit" value ="Delete">
-            </form>
-            </div>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <form action="{{url_for('delete_project', project_id=project.id, username=current_user.username)}}" method="POST">
+                    <input class = "btn btn-danger" type="submit" value ="Delete">
+                </form>
             </div>
         </div>
-        </div>
-    <div>
+    </div>
 </div>
-<hr></hr>
+
+<button type="button" class="btn btn-dark" data-toggle="collapse" data-target="#members">Member List</button>
+<div id="members" class="collapse">
     <br>
-    <a href="{{ url_for('create_card', project_id=project.id, username=current_user.username)}}"><button type="button" class="btn btn-primary btn-lg">Create a new card</button></a>
-    <!-- Pill tabs -->
-    <ul class="nav nav-pills" role="tablist">
-      <li class="nav-item">
-        <a class="nav-link active" data-toggle="pill" href="#chat">Chat</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-toggle="pill" href="#board">Board</a>
-      </li>
+    {% for username in usernames%}
+    <style>
+        .avatar {
+        vertical-align: middle;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        }
+    </style>
+    <ul>
+        <li><img class="avatar" alt="user_image" src="{{ url_for('static', filename='profile_pics/' + 'default.jpg') }}"> {{ username.username }}</li>
     </ul>
+    {% endfor %}
+    <a href="{{ url_for('invite', project_id=project.id, username=current_user.username)}}">
+        <button type="button" class="btn btn-secondary btn-sm" style="margin-left: 25px;">Invite Member</button>
+    </a>
+</div>
 
-    <!-- Pill panes -->
-    <div class="tab-content">
-        <div id="chat" class="container tab-pane active"><br>
-            <h3>Chat</h3>
-            
-            <div id = "main-section">
-                <!-- Chat Selection -->
+<hr></hr>
 
-                <nav id = "sidebar">
-                    <h4>CHANNELS</h4>
-                    {% for room in rooms %}
-                        <p class = "select-room"> {{ room|title }} </p>
+<!-- Pill tabs -->
+<ul class="nav nav-pills" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" data-toggle="pill" href="#chat">Chat</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-toggle="pill" href="#board">Board</a>
+    </li>
+</ul>
+
+<!-- Pill panes -->
+<div class="tab-content">
+    <div id="chat" class="container tab-pane active"><br>
+        <h3>Chat</h3>
+        <div id = "main-section">
+            <!-- Chat Selection -->
+            <nav id = "sidebar">
+                <h4>CHANNELS</h4>
+                {% for room in rooms %}
+                    <p class = "select-room"> {{ room|title }} </p>
+                {% endfor %}
+            </nav>
+            <!-- Message Area -->
+            <div id = "rightside-panel">
+                <div id="display-message-section">
+                    {% for message in messages %}
+                        <p class = my-msg>
+                            <span class = my-username>{{message.username}}</span>
+                            <br></br>
+                            <span> {{ message.message }} </span>
+                        </p>
                     {% endfor %}
 
-                </nav>
-                <!-- Message Area -->
+                </div>
+            </div>
+            <!-- Input Message -->
+            <div id = "input-area">
+                <input type="text" id = "user_message" placeholder ="Type here..." autocomplete="off">
+                <button type = "button" id = "send_message">SEND</button>
+            </div>
+        </div>                  
+    </div>
+    <!-- Card Board Section-->
+    <div id="board" class="container tab-pane fade"><br>
+        <h3>Project Board</h3>
+        <a href="{{ url_for('create_card', project_id=project.id, username=current_user.username)}}">
+            <button type="button" class="btn btn-primary btn-lg">Create a new card</button>
+        </a>
+        <div class="container">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <a class = "nav-link" href="#trash" data-toggle="tab">Trash</a>
+                </li>                
+                    <!-- <a class = "nav-link active" href="#sprint_1" data-toggle="tab">Sprint 1</a> -->
+                {% for sprint in sprints %}
+                {% if sprint.sprint_num == 1 %}
+                <li class="nav-item">                   
+                    <a class = "nav-link active" href="#sprint_{{sprint.sprint_num}}" data-toggle="tab">Sprint {{sprint.sprint_num}}</a>
+                </li>
+                {% else %}
+                <li class="nav-item">                   
+                    <a class = "nav-link" href="#sprint_{{sprint.sprint_num}}" data-toggle="tab">Sprint {{sprint.sprint_num}}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+                
+                <li class = "nav-item">
+                    <a href="#" class="add-contact nav-link">+ Add Sprint</a>
+                </li>
+            </ul>
 
-                <div id = "rightside-panel">
-                    <div id="display-message-section">
-
-                        {% for message in messages %}
-                            <p class = my-msg>
-                                <span class = my-username>{{message.username}}</span>
-                                <br></br>
-                                <span> {{ message.message }} </span>
-                            </p>
-                        {% endfor %}
-
-                    </div>
-                    <!-- Input Message -->
-                    <div id = "input-area">
-                        <input type="text" id = "user_message" placeholder ="Type here..." autocomplete="off">
-                        <button type = "button" id = "send_message">SEND</button>
-                    </div>
+            <div class = "lists">  <!-- Moved this so the backlog is persistant across all tab panes -->
+                <div class = "list border border-dark rounded" id="backlog_1">
+                    <h4 style="text-align:center">Backlog</h4>
+                    {% for backlog in backlogs%}
+                    <div class="list-item" draggable="true" id="card_{{backlog.id}}">  {{ backlog.description }} </div>
+                    {% endfor %}
                 </div>
             </div>
 
-                                   
-        </div>
-    <div id="board" class="container tab-pane fade"><br>
-        <h3>Project Board</h3>
-        <div class="container">
-            <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item"><a class = "nav-link" href="#trash" data-toggle="tab">Trash</a>
-                </li>
-                <li class="nav-item"><a class = "nav-link active" href="#sprint_1" data-toggle="tab">Sprint 1</a>
-                </li>
-                <li class = "nav-item"><a href="#" class="add-contact nav-link">+ Add Sprint</a>
-                </li>
-            </ul>
             <div class="tab-content">
                 <div class="tab-pane active" id="sprint_1">
                     <div class = "lists">
-                        <div class = "list border border-dark rounded">
+                        <!-- <div class = "list border border-dark rounded" id="backlog1">
                             <h4 style="text-align:center">Backlog</h4>
                             {% for backlog in backlogs%}
-                            <div class = "list-item" draggable = "true">{{ backlog.description }} </div>
+                            <div class="list-item" draggable="true" id="card{{loop.index}}">  {{ backlog.description }} </div>
+                            {% endfor %}
+                        </div> -->                        
+                        <div class = "list" id="ip_1">
+                            <h4 style="text-align:center">In Progress</h4>
+                            {% for inc in incompletes %}
+                            {% if inc.sprint_id == 1 %}
+                            <div class="list-item" draggable="true" id="card_{{inc.id}}">  {{inc.title}} </div>
+                            {% endif %}
                             {% endfor %}
                         </div>
-                        <div class = "list">
-                            <h4 style="text-align:center">In Progress</h4>
-                        </div>
-                        <div class = "list">
+                        <div class = "list" id="done_1">
                             <h4 style="text-align:center">Done</h4>
+                            {% for com in completes %}
+                            {% if com.sprint_id == 1 %}
+                                <div class="list-item" draggable="true" id="card_{{com.id}}">  {{com.title}} </div>
+                            {% endif %}
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
+                {% for sprint in sprints %}       
+                {% if sprint.sprint_num != 1 %}
+                <div class="tab-pane" id="sprint_{{ sprint.sprint_num }}">
+                    <div class = "lists">
+                        <div class = "list" id="ip_{{sprint.sprint_num}}">
+                            <h4 style="text-align:center">In Progress</h4>
+                                {% for inc in incompletes %}
+                                {% if inc.sprint_id == sprint.sprint_num %}
+                                <div class="list-item" draggable="true" id="card_{{inc.id}}">  {{inc.title}} </div>
+                                {% endif %}
+                                {% endfor %}
+                        </div>
+                        <div class = "list" id="done_{{sprint.sprint_num}}">
+                            <h4 style="text-align:center">Done</h4>
+                            {% for com in completes %}
+                            {% if com.sprint_id == sprint.sprint_num %}
+                                <div class="list-item" draggable="true" id="card_{{com.id}}">  {{com.title}} </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
                 <div class="tab-pane" id="trash">
                     <div class = "lists">
-                        <div class = "list border border-dark rounded">
+                        <div class = "list border border-dark rounded" id="backlog">
                             <h4 style="text-align:center">Backlog</h4>
                             {% for backlog in backlogs%}
-                            <div class = "list-item" draggable = "true">{{ backlog.description }}</div>
+                            <div class = "list-item" draggable = "true" id="card{{loop.index}}">{{ backlog.description }}</div>
                             {% endfor %}
                         </div>
                         <div class = "list">
@@ -155,8 +207,10 @@
             </div>
         </div>
     </div>
+</div>
 
 <script type="text/javascript">
+    
     $(".nav-tabs").on("click", "a", function (e) {
         e.preventDefault();
         if (!$(this).hasClass('add-contact')) {
@@ -200,21 +254,19 @@ const list_items = document.querySelectorAll('.list-item');
 const lists = document.querySelectorAll('.list');
 
 let draggedItem = null;
-
 for (let i = 0; i<list_items.length; i++){
     const item = list_items[i];
 
     item.addEventListener('dragstart', function(){
         draggedItem = item;
         setTimeout(function () {
-            item.style.display = 'none';
+            socket.emit('cardDragStart', item.id);            
         }, 0);
     });
 
     item.addEventListener('dragend', function () {
-        setTimeout(function () {
-            draggedItem.style.display = 'block';
-            draggedItem = null;
+        setTimeout(function () {                        
+            //draggedItem = null;
         }, 0);
     });
 
@@ -231,33 +283,41 @@ for (let i = 0; i<list_items.length; i++){
             this.style.backgroundColor = '#eaeded';
         });
         list.addEventListener('drop', function (e) {
+            let element = this;          
+            let newSprint = element.id.split("_"); /* default to the backlog */
+            let status = 'backlog';
+            let stReg = /ip/;
+            if(stReg.test(element.id)){
+                status = 'incomplete';   /* Reg expressions to identify the new status */
+            }
+            stReg = /done/;
+            if(stReg.test(element.id)){
+                status = 'complete';
+            }
+            console.log(element.id);
             this.append(draggedItem);
             this.style.backgroundColor = '#eaeded';
+            socket.emit('cardDrop', { 'id': draggedItem.id, 'parent':element.id,
+             'status':status, "newSprint": newSprint[1]});
         });
-    }
+    }    
 }
+
 </script>
 
 <!-- Get username -->
 <span id="get-username">{{ username }}</span>
-
-<!-- Custom Chat JS -->
-<script src="{{ url_for('static', filename='scripts/chat_page.js')}}"></script>
 <!-- SocketIO JS -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+<!-- Custom Chat JS -->
+<script src="{{ url_for('static', filename='scripts/chat_page.js')}}"></script>
+
 
 <!-- Custom SocketIO JS -->
 <script src="{{url_for('static', filename='scripts/socketio.js')}}"></script>
-
-<!-- Bootstrap -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 
 <!-- Font Awesome JS -->
 <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
 <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
 
 {% endblock content %}
-
-
-

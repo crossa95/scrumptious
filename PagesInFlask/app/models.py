@@ -53,7 +53,7 @@ class Card(db.Model):
     description = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(20), nullable=False, default = 'backlog')
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
-
+    sprint_id = db.Column(db.Integer, default = 0)
 
     def __repr__(self):
         return f"Card('{self.title}', '{self.description}')"
@@ -68,7 +68,10 @@ class History(db.Model):
     def __repr__(self):
         return f"Msg('{self.message}')"
 
+class Sprint(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    sprint_num = db.Column(db.Integer, nullable=False)
 
-
-
-
+    def __repr__(self):
+        return f"Msg('{self.sprint_num}')"

@@ -8,7 +8,7 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from app import app, db, bcrypt, socketio
 from app.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, ProjectForm, UpdateProjectForm, CardForm, InviteForm
-from app.models import User, Project, Card, History
+from app.models import User, Project, Card, History, Sprint
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_socketio import send, emit, join_room, leave_room
 
@@ -175,6 +175,11 @@ def project(project_id,username,methods=['GET', 'POST']):
     backlogs = Card.query.filter_by(status = 'backlog', author=project).all()
     incompletes = Card.query.filter_by(status = 'incomplete', author=project).all()
     completes = Card.query.filter_by(status = 'complete', author=project).all()
+    print(project.id)
+    print(completes) #console logging to ensure info is being obtained
+    print(incompletes)
+    sprints = Sprint.query.filter_by(project_id=project.id).all()
+    print(sprints)
 
     # here I am getting all the users involved in this project
     # remember that they are being stored via user_id since this doesn't change even if a person changes their email, username, etc.
@@ -185,7 +190,7 @@ def project(project_id,username,methods=['GET', 'POST']):
         user= User.query.get(var.id)
         usernames.append(user)
 
-    return render_template('project.html', title=project.title, project=project, backlogs = backlogs, incompletes = incompletes, completes = completes, members=members, usernames = usernames,username = current_user.username, rooms = ROOMS)
+    return render_template('project.html', title=project.title, project=project, backlogs = backlogs, incompletes = incompletes, completes = completes, members=members, usernames = usernames,username = current_user.username, rooms = ROOMS, sprints=sprints)
 
 @app.route("/user/<string:username>/myprojects/project/<int:project_id>/update", methods=['GET', 'POST'])
 @login_required
@@ -307,3 +312,21 @@ def join(data):
 def leave(data):
     leave_room(data['room'])
     send({'msg': data['username'] + " has left the " + data['room'] + " room."}, room=data['room'])
+
+@socketio.on('cardDragStart')
+def cardDragStart(data):
+    emit('cardDragging', data, broadcast=True)
+
+@socketio.on('cardDrop')
+def cardDrop(json):
+    print(json["status"])
+    card_id = json["id"]
+    card_id = card_id[5:len(card_id)] #cutting off the "card_"
+    print(card_id)
+    stmt = db.session.query(Card).get(card_id)
+    stmt.sprint_id = json["newSprint"]
+    stmt.status = json['status']
+    if stmt.status == 'backlog':
+        stmt.sprint_id = 0
+    db.session.commit()
+    emit('cardDrop', json, broadcast=True)
