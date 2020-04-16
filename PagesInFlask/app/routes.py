@@ -242,7 +242,8 @@ def create_card(project_id, username):
             usernames.append(user)
         flash('You have successfully created a new card', 'success')
         backlogs = Card.query.filter_by(status = 'backlog', author=project).all()
-        return render_template('project.html', title=project.title, project=project, backlogs = backlogs, usernames = usernames)
+        return render_template('project.html', title=project.title, project=project, backlogs = backlogs, usernames = usernames,
+            username = current_user.username, rooms = ROOMS)
     return render_template('create_card.html', title='Create Card', form=form, legend = 'Create Card')
 
 @app.route("/user/<string:username>/myprojects/project/<int:project_id>/cards/<int:card_id>/delete", methods=['POST'])
@@ -319,10 +320,8 @@ def cardDragStart(data):
 
 @socketio.on('cardDrop')
 def cardDrop(json):
-    print(json["status"])
     card_id = json["id"]
     card_id = card_id[5:len(card_id)] #cutting off the "card_"
-    print(card_id)
     stmt = db.session.query(Card).get(card_id)
     stmt.sprint_id = json["newSprint"]
     stmt.status = json['status']
@@ -330,3 +329,9 @@ def cardDrop(json):
         stmt.sprint_id = 0
     db.session.commit()
     emit('cardDrop', json, broadcast=True)
+
+@socketio.on('addSprint')
+def addSprint(json):
+    toAdd = Sprint(project_id=json["id"], sprint_num = json["sprint"])
+    db.session.add(toAdd)
+    db.session.commit() 

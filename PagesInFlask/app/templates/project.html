@@ -50,7 +50,7 @@
         }
     </style>
     <ul>
-        <li><img class="avatar" alt="user_image" src="{{ url_for('static', filename='profile_pics/' + 'default.jpg') }}"> {{ username.username }}</li>
+        <li><img class="avatar" alt="user_image" src="{{ url_for('static', filename='profile_pics/' + username.image_file) }}"> {{ username.username }}</li>
     </ul>
     {% endfor %}
     <a href="{{ url_for('invite', project_id=project.id, username=current_user.username)}}">
@@ -179,7 +179,7 @@
                                 {% endif %}
                                 {% endfor %}
                         </div>
-                        <div class = "list" id="done_{{sprint.sprint_num}}">
+                        <div class = "list" id="done_{{ sprint.sprint_num }}">
                             <h4 style="text-align:center">Done</h4>
                             {% for com in completes %}
                             {% if com.sprint_id == sprint.sprint_num %}
@@ -228,26 +228,21 @@ $('.add-contact').click(function (e) {
     e.preventDefault();
     var id = $(".nav-tabs").children().length-1; //think about it ;)
     var tabId = 'contact_' + id;
-    $(this).closest('li').before('<li class ="nav-item"><a class = "nav-link" href="#contact_' + id + '">Sprint ' + id + '</a> <span> x </span></li>');
-    $('.tab-content').append('<div class="tab-pane" id="' + tabId + '"><div class="container">' +
-                    '<h5>This is Sprint ' + id + '</h5>' +
-                    '<div class="tab-content">' +
-                '<div class="tab-pane active" id="sprint_1">' +
-                    '<div class = "lists">' +
-                        '<div class = "list border border-dark rounded">' +
-                           ' <h4 style="text-align:center">Backlog</h4>' +
-                        '</div>' +
-                        '<div class = "list">' +
-                            '<h4 style="text-align:center">In Progress</h4>' +
-                        '</div>' +
-                        '<div class = "list">' +
-                            '<h4 style="text-align:center">Done</h4>' +
-                        '</div>' +
+    $(this).closest('li').before('<li class ="nav-item"><a class = "nav-link" href="#sprint_' +
+                                     id + '" data-toggle="tab" >Sprint ' + id + '</a></li>');
+    $('.tab-content').append(
+            '<div class="tab-pane" id="sprint_' + id + '">' +
+                '<div class = "lists">' +
+                    '<div class = "list" id=ip_' + id + '>' +
+                        '<h4 style="text-align:center">In Progress</h4>' +
                     '</div>' +
-                '</div>' +
+                    '<div class = "list" id=done_' + id + '>' +
+                        '<h4 style="text-align:center">Done</h4>' +
+                    '</div>' +
                 '</div>' +
             '</div>');
    $('.nav-tabs li:nth-child(' + id + ') a').click();
+   socket.emit('addSprint', {id:'{{project.id}}', sprint: id})
 });
 
 const list_items = document.querySelectorAll('.list-item');
@@ -294,7 +289,6 @@ for (let i = 0; i<list_items.length; i++){
             if(stReg.test(element.id)){
                 status = 'complete';
             }
-            console.log(element.id);
             this.append(draggedItem);
             this.style.backgroundColor = '#eaeded';
             socket.emit('cardDrop', { 'id': draggedItem.id, 'parent':element.id,
