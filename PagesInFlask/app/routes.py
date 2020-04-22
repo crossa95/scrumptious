@@ -262,7 +262,7 @@ def invite(project_id, username):
 @socketio.on('message')
 def message(data):
     print(f"\n\n{data}\n\n")
-    message = Chat_History(message=data['msg'],username = data['username'],room =data['room'])
+    message = Chat_History(message=data['msg'],username = data['username'],room =data['room'], project_id = data['project_id'])
     db.session.add(message)
     db.session.commit()
     send({'msg': data['msg'], 'username': data['username'], 'time_stamp': strftime('%b-%d %I:%M%p', localtime())}, room=data['room'])
@@ -270,7 +270,7 @@ def message(data):
 @socketio.on('join')
 def join(data):
     join_room(data['room'])
-    messages = Chat_History.query.filter_by(project_id = 1, room = data['room']).all()
+    messages = Chat_History.query.filter_by(project_id = data['project_id'], room = data['room'] ).all()
     for msg in messages:
         send({'msg': msg.message, 'username':msg.username,'room':data['room']})
     send({'msg': data['username'] + " has joined the " + data['room'] + " room."}, room=data['room'])
