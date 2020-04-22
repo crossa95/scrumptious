@@ -145,7 +145,7 @@ def create_project(username):
         project.users_in.append(user)
         db.session.commit()
         flash('You have successfully created a new project', 'success')
-        return redirect(url_for('user_projects', projects = projects, username = current_user.username))
+        return redirect(url_for('user_projects', username = current_user.username))
     return render_template('create_project.html', title='New Project', form=form, legend = 'New Project')
 
 @app.route("/user/<string:username>/myprojects")
