@@ -63,7 +63,7 @@ class Chat_History(db.Model):
     id = db.Column('id', db.Integer, primary_key=True)
     message = db.Column('message',db.String(500))
     username = db.Column('username', db.String(20), nullable=False)
-    time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
     room = db.Column('room',db.String(20),nullable = False)
     project_id = db.Column(db.Integer, nullable=False, default=1)
     def __repr__(self):
