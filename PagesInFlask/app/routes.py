@@ -288,18 +288,11 @@ def invite(project_id, username):
     return render_template('invite.html', title='Invite a Member', form=form, legend = 'Invite a Member')
 
 
-# This is the socket stuff. Honestly, I am not too familiar with this part, and can't explain it in as much detail
-# I am defining methods for sending messages, joining rooms, and leaving rooms.
-# I am unsure if I want to keep the join and leave methods. I don't think they're completely necessary
+# These are the socket functions for joining/leaving rooms and sending messages
 @socketio.on('message')
 def message(data):
     print(f"\n\n{data}\n\n")
-
-    # Currently history is only saving the message content as well as the username of who sent the message
-    # I was having a little issue with storing the date and time
-    # This is also only one history. Anything messages is getting stored and it is not channel specific.
-    # This has yet to be modeled in models.py
-    message = History(message=data['msg'], username=data['username'])
+    message = Chat_History(message=data['msg'],username = data['username'],room =data['room'])
     db.session.add(message)
     db.session.commit()
     send({'msg': data['msg'], 'username': data['username'], 'time_stamp': strftime('%b-%d %I:%M%p', localtime())}, room=data['room'])
@@ -307,13 +300,17 @@ def message(data):
 @socketio.on('join')
 def join(data):
     join_room(data['room'])
+    messages = Chat_History.query.filter_by(project_id = 1, room = data['room']).all()
+    for msg in messages:
+        send({'msg': msg.message, 'username':msg.username,'room':data['room']})
     send({'msg': data['username'] + " has joined the " + data['room'] + " room."}, room=data['room'])
 
 @socketio.on('leave')
 def leave(data):
     leave_room(data['room'])
     send({'msg': data['username'] + " has left the " + data['room'] + " room."}, room=data['room'])
-
+    
+    
 @socketio.on('cardDragStart')
 def cardDragStart(data):
     emit('cardDragging', data, broadcast=True)
