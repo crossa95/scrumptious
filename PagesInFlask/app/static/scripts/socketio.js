@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Send message
     document.querySelector('#send_message').onclick = () => {
         socket.send({'msg': document.querySelector('#user_message').value,
-            'username': username, 'room': room });
+            'username': username, 'room': room , project_id:project_id});
 
         // Clear input area
         document.querySelector('#user_message').value = '';
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Join room
     function joinRoom(room) {
-        socket.emit('join', {'username': username, 'room': room})
+        socket.emit('join', {'username': username, 'room': room , project_id:project_id})
 
         // Clear message area
         document.querySelector('#display-message-section').innerHTML = ''
