@@ -11,7 +11,8 @@ from app.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, 
 from app.models import User, Project, Card, Chat_History, Sprint, subs
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_socketio import send, emit, join_room, leave_room
-
+from datetime import datetime
+import json
 # Pre-defined chat rooms
 ROOMS = ["general", "design", "prototype", "problems"]
 
