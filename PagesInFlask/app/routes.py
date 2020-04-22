@@ -8,7 +8,7 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from app import app, db, bcrypt, socketio
 from app.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, ProjectForm, UpdateProjectForm, CardForm, InviteForm
-from app.models import User, Project, Card, Chat_History, Sprint
+from app.models import User, Project, Card, Chat_History, Sprint, subs
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_socketio import send, emit, join_room, leave_room
 
@@ -210,9 +210,16 @@ def update_project(project_id, username):
 @app.route("/user/<string:username>/myprojects/project/<int:project_id>/delete", methods=['POST'])
 @login_required
 def delete_project(project_id, username):
+    for row in db.session.query(Card).filter(Card.project_id == project_id):
+        db.session.delete(row)
+    db.session.commit()
+
+    for row in db.session.query(Sprint).filter(Sprint.project_id == project_id):
+        db.session.delete(row)
+    db.session.commit()
+
     project = Project.query.get_or_404(project_id)
     project.users_in = []
-    db.session.commit()
     db.session.delete(project)
     db.session.commit()
     flash('Your project has been successfully deleted.', 'success')
