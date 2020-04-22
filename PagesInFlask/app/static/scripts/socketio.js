@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // retrive username
     const username = document.querySelector('#get-username').innerHTML;
-
+    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     //set default room
     let room = "General";
     joinRoom("General");
