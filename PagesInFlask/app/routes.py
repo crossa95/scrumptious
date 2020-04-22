@@ -274,12 +274,18 @@ def message(data):
     db.session.commit()
     send({'msg': data['msg'], 'username': data['username'], 'time_stamp': strftime('%b-%d %I:%M%p', localtime())}, room=data['room'])
 
+def myconverter(time):
+    time = datetime.strftime(time,'%b-%d %I:%M%p')
+    return time
+
 @socketio.on('join')
 def join(data):
     join_room(data['room'])
     messages = Chat_History.query.filter_by(project_id = data['project_id'], room = data['room'] ).all()
     for msg in messages:
-        send({'msg': msg.message, 'username':msg.username,'room':data['room']})
+        time = json.dumps(msg.time_stamp, default = myconverter)
+        time = time.strip('"')
+        send({'msg': msg.message, 'username':msg.username, 'time_stamp': time,'room':data['room']})
     send({'msg': data['username'] + " has joined the " + data['room'] + " room."}, room=data['room'])
 
 @socketio.on('leave')
