@@ -74,7 +74,7 @@ class Chat_History(db.Model):
 class Sprint(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
-    sprint_num = db.Column(db.Integer, nullable=False)
+    sprint_num = db.Column(db.Integer, nullable=False, default =1)
 
     def __repr__(self):
         return f"Msg('{self.sprint_num}')"
