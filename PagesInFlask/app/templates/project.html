@@ -135,7 +135,7 @@
                 <div class = "list border border-dark rounded" id="backlog_1">
                     <h4 style="text-align:center">Backlog</h4>
                     {% for backlog in backlogs%}
-                    <div class="list-item" draggable="true" id="card_{{backlog.id}}">  {{ backlog.description }} </div>
+                    <div class="list-item" draggable="true" id="card_{{backlog.id}}">  {{ backlog.title }} </div>
                     {% endfor %}
                 </div>
             </div>
