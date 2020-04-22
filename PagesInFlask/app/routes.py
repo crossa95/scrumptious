@@ -145,7 +145,7 @@ def create_project(username):
         project.users_in.append(user)
         db.session.commit()
         flash('You have successfully created a new project', 'success')
-        return redirect(url_for('user_projects', username = current_user.username))
+        return redirect(url_for('user_projects', projects = projects, username = current_user.username))
     return render_template('create_project.html', title='New Project', form=form, legend = 'New Project')
 
 @app.route("/user/<string:username>/myprojects")
@@ -168,18 +168,13 @@ def project(project_id,username,methods=['GET', 'POST']):
     if not members:
        abort(403)
 
-    # this part is me making room for passing in backlogs, todos, and done cards
-    # this part needs work for sure
-    # basically, I'm querying the db via one of the properties - status
-    # and then assigning everything it gets back into a variable that I pass into the project.html template
-    backlogs = Card.query.filter_by(status = 'backlog', author=project).all()
-    incompletes = Card.query.filter_by(status = 'incomplete', author=project).all()
-    completes = Card.query.filter_by(status = 'complete', author=project).all()
-    print(project.id)
-    print(completes) #console logging to ensure info is being obtained
-    print(incompletes)
     sprints = Sprint.query.filter_by(project_id=project.id).all()
-    print(sprints)
+
+    backlogs = Card.query.filter_by(status = 'backlog', project_id=project_id).all()
+    incompletes = Card.query.filter_by(status = 'incomplete', project_id=project_id).all()
+    completes = Card.query.filter_by(status = 'complete', project_id=project_id).all()
+    
+    
 
     # here I am getting all the users involved in this project
     # remember that they are being stored via user_id since this doesn't change even if a person changes their email, username, etc.
@@ -190,7 +185,8 @@ def project(project_id,username,methods=['GET', 'POST']):
         user= User.query.get(var.id)
         usernames.append(user)
 
-    return render_template('project.html', title=project.title, project=project, backlogs = backlogs, incompletes = incompletes, completes = completes, members=members, usernames = usernames,username = current_user.username, rooms = ROOMS, sprints=sprints)
+    return render_template('project.html', title=project.title, project=project, backlogs = backlogs, incompletes = incompletes,
+     completes = completes, members=members, usernames = usernames,username = current_user.username, rooms = ROOMS, sprints=sprints)
 
 @app.route("/user/<string:username>/myprojects/project/<int:project_id>/update", methods=['GET', 'POST'])
 @login_required
@@ -225,25 +221,14 @@ def create_card(project_id, username):
     project = Project.query.get_or_404(project_id)
 
     # Right now, status is being set to backlog because that's where the button is that leads to this route
-    backlogs = Card.query.filter_by(status = 'backlog', author=project).all()
     form = CardForm()
     if form.validate_on_submit():
         card = Card(title=form.title.data, description=form.description.data, author=project)
         db.session.add(card)
         db.session.commit()
-
-        # We need to include this again because after creating a card we go back into the project html which will then require this info once again
-        # there's 100% a better way to do this, but this is what I have
-
-        users = project.users_in
-        usernames = []
-        for var in users:
-            user= User.query.get(var.id)
-            usernames.append(user)
         flash('You have successfully created a new card', 'success')
-        backlogs = Card.query.filter_by(status = 'backlog', author=project).all()
-        return render_template('project.html', title=project.title, project=project, backlogs = backlogs, usernames = usernames,
-            username = current_user.username, rooms = ROOMS)
+        return redirect(url_for('project',project_id=project.id, username=current_user.username))
+
     return render_template('create_card.html', title='Create Card', form=form, legend = 'Create Card')
 
 @app.route("/user/<string:username>/myprojects/project/<int:project_id>/cards/<int:card_id>/delete", methods=['POST'])
@@ -255,36 +240,18 @@ def delete_card(card_id, username, project_id):
     flash('Your card has been successfully deleted.', 'success')
     return render_template('create_card.html', title='Create Card', form=form, legend = 'Create Card')
 
-@app.route("/chat", methods=['GET', 'POST'])
-def chat():
-    messages = History.query.all()
-    if not current_user.is_authenticated:
-        flash('Please login.', 'danger')
-        return redirect(url_for('login'))
-        # chat.html links with our socketio.js and chat_page.js
-    return render_template('chat.html', username = current_user.username, rooms = ROOMS, messages = messages)
-
 @app.route("/user/<string:username>/myprojects/project/<int:project_id>/invite", methods=['GET', 'POST'])
 @login_required
 def invite(project_id, username):
     project = Project.query.get_or_404(project_id)
-    backlogs = Card.query.filter_by(status = 'backlog', author=project).all()
-    incompletes = Card.query.filter_by(status = 'incomplete', author=project).all()
-    completes = Card.query.filter_by(status = 'complete', author=project).all()
-
     form = InviteForm()
     if form.validate_on_submit():
         user_email = form.email.data
         user = User.query.filter_by(email=user_email).first_or_404()
         project.users_in.append(user)
         db.session.commit()
-        users = project.users_in
-        usernames = []
-        for var in users:
-            user= User.query.get(var.id)
-            usernames.append(user)
         flash(user_email + ' has successfully been added.', 'success')
-        return render_template('project.html', title=project.title, project=project, backlogs = backlogs, incompletes = incompletes, completes = completes, usernames = usernames)
+        return redirect(url_for('project',project_id=project.id, username=current_user.username))
     return render_template('invite.html', title='Invite a Member', form=form, legend = 'Invite a Member')
 
 
