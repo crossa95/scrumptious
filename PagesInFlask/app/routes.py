@@ -218,7 +218,15 @@ def delete_project(project_id, username):
     for row in db.session.query(Sprint).filter(Sprint.project_id == project_id):
         db.session.delete(row)
     db.session.commit()
-
+    
+    for row in db.session.query(Chat_History).filter(Chat_History.project_id == project_id):
+        db.session.delete(row)
+    db.session.commit()
+ 
+    subss = db.session.query(subs).filter_by(project_id=project_id)
+    subss.delete(synchronize_session=False)
+    db.session.commit()
+    
     project = Project.query.get_or_404(project_id)
     project.users_in = []
     db.session.delete(project)
