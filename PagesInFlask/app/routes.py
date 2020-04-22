@@ -8,7 +8,7 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from app import app, db, bcrypt, socketio
 from app.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, ProjectForm, UpdateProjectForm, CardForm, InviteForm
-from app.models import User, Project, Card, History, Sprint
+from app.models import User, Project, Card, Chat_History, Sprint
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_socketio import send, emit, join_room, leave_room
 
