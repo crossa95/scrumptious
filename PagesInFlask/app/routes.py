@@ -143,6 +143,9 @@ def create_project(username):
         # This is the same logic as with a youtube channel and people subscribed to it
 
         project.users_in.append(user)
+        json = {'id' : project.id,'sprint':1}
+        toAdd = Sprint(project_id=json["id"], sprint_num = json["sprint"])
+        db.session.add(toAdd)
         db.session.commit()
         flash('You have successfully created a new project', 'success')
         return redirect(url_for('user_projects', username = current_user.username))
