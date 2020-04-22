@@ -59,14 +59,17 @@ class Card(db.Model):
         return f"Card('{self.title}', '{self.description}')"
 
 
-class History(db.Model):
+class Chat_History(db.Model):
     id = db.Column('id', db.Integer, primary_key=True)
     message = db.Column('message',db.String(500))
     username = db.Column('username', db.String(20), nullable=False)
     time_stamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
+    room = db.Column('room',db.String(20),nullable = False)
+    project_id = db.Column(db.Integer, nullable=False, default=1)
     def __repr__(self):
         return f"Msg('{self.message}')"
+
+
 
 class Sprint(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -75,3 +78,5 @@ class Sprint(db.Model):
 
     def __repr__(self):
         return f"Msg('{self.sprint_num}')"
+    
+db.create_all()
