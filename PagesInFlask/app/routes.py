@@ -178,12 +178,6 @@ def project(project_id,username,methods=['GET', 'POST']):
     incompletes = Card.query.filter_by(status = 'incomplete', project_id=project_id).all()
     completes = Card.query.filter_by(status = 'complete', project_id=project_id).all()
     
-    
-
-    # here I am getting all the users involved in this project
-    # remember that they are being stored via user_id since this doesn't change even if a person changes their email, username, etc.
-    # But because this is how we are storing it, we need to get the actual user associated with that project so that
-    # we can get info of that user to display such as their picture, name, maybe email, etc.
     usernames = []
     for var in members:
         user= User.query.get(var.id)
@@ -243,20 +237,14 @@ def create_card(project_id, username):
     form = CardForm()
     if form.validate_on_submit():
         card = Card(title=form.title.data, description=form.description.data, author=project)
+        id = card.id
+        title = form.title.data
         db.session.add(card)
         db.session.commit()
         flash('You have successfully created a new card', 'success')
+        socketio.emit('cardCreate', {'card_id' : id, 'priority':'black', 'title':title}, broadcast = True)
         return redirect(url_for('project',project_id=project.id, username=current_user.username))
 
-    return render_template('create_card.html', title='Create Card', form=form, legend = 'Create Card')
-
-@app.route("/user/<string:username>/myprojects/project/<int:project_id>/cards/<int:card_id>/delete", methods=['POST'])
-@login_required
-def delete_card(card_id, username, project_id):
-    card = Card.query.get_or_404(project_id)
-    db.session.delete(card)
-    db.session.commit()
-    flash('Your card has been successfully deleted.', 'success')
     return render_template('create_card.html', title='Create Card', form=form, legend = 'Create Card')
 
 @app.route("/user/<string:username>/myprojects/project/<int:project_id>/invite", methods=['GET', 'POST'])
@@ -361,3 +349,8 @@ def cardPriority(json):
         card.priority = 'black'
     db.session.commit()
     emit('cardPriority', {'card_id' : json['card_id'], 'priority':card.priority}, broadcast = True)
+
+""" @socketio.on('cardCreate')
+def cardCreate(json):
+    emit('cardPriority', {'card_id' : json['card_id'], 'priority':'black', 'title':json['title']}, broadcast = True)
+ """

@@ -146,6 +146,25 @@ socket.on('cardPriority', json => {
     console.log(element)
     element.style.color = json['priority'];
 })
+
+socket.on('cardCreate', json => {
+    ele_id = "card_"+String(json["card_id"])
+    element = document.createElement("div");
+    element.classList="list-item";
+    element.draggable="true";
+    element.id=ele_id;
+    element.innerText = json['title'];
+    element.priority = json['priority'];
+    console.log(element)
+    document.querySelector("#backlog_1").appendChild(element);
+
+})
+
+
+
+
+
+
 /**
    * Actions For Each ContextMenu Option
    */
