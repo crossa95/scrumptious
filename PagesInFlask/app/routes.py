@@ -324,3 +324,16 @@ def addSprint(json):
     toAdd = Sprint(project_id=json["id"], sprint_num = json["sprint"])
     db.session.add(toAdd)
     db.session.commit() 
+    
+@socketio.on('cardClick')
+def cardClick(json):
+    card_id = json["id"]
+    stmt = db.session.query(Card).get(card_id)
+    if json['displayed'] == stmt.title:
+        json = stmt.description
+        ele_id = "card_"+ str(card_id)
+        emit('cardClick', {'json':json, 'id':ele_id })
+    else:
+        json = stmt.title
+        ele_id = "card_"+ str(card_id)
+        emit('cardClick', {'json':json, 'id':ele_id })
