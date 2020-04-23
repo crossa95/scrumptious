@@ -123,3 +123,11 @@ socket.on('cardDrop', data => {
     document.getElementById(data.parent).append(element);
     
 })
+
+socket.on('cardClick', data => {
+    ele_id = data['id'];
+    new_text = data['json'];
+    new_text = String(new_text);
+    var element = document.getElementById(ele_id);
+    element.innerText = new_text;
+})
