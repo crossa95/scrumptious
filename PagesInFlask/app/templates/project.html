@@ -264,6 +264,13 @@ for (let i = 0; i<list_items.length; i++){
             //draggedItem = null;
         }, 0);
     });
+    
+    item.addEventListener('click', function() {
+        card_id = item.id;
+        card_id = parseInt(card_id.replace("card_",""));
+
+        socket.emit('cardClick', {'id':card_id, 'displayed':item.innerText});
+    });
 
     for (let j = 0; j < lists.length; j++){
         const list = lists[j];
