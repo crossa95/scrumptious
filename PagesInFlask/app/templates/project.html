@@ -135,7 +135,7 @@
                 <div class = "list border border-dark rounded" id="backlog_1">
                     <h4 style="text-align:center">Backlog</h4>
                     {% for backlog in backlogs%}
-                    <div class="list-item" draggable="true" id="card_{{backlog.id}}">  {{ backlog.title }} </div>
+                    <div class="list-item" draggable="true" priority="{{backlog.priority}}" id="card_{{backlog.id}}">  {{ backlog.title }} </div>
                     {% endfor %}
                 </div>
             </div>
@@ -153,7 +153,7 @@
                             <h4 style="text-align:center">In Progress</h4>
                             {% for inc in incompletes %}
                             {% if inc.sprint_id == 1 %}
-                            <div class="list-item" draggable="true" id="card_{{inc.id}}">  {{inc.title}} </div>
+                            <div class="list-item" draggable="true" priority="{{inc.priority}}" id="card_{{inc.id}}">  {{inc.title}} </div>
                             {% endif %}
                             {% endfor %}
                         </div>
@@ -161,7 +161,7 @@
                             <h4 style="text-align:center">Done</h4>
                             {% for com in completes %}
                             {% if com.sprint_id == 1 %}
-                                <div class="list-item" draggable="true" id="card_{{com.id}}">  {{com.title}} </div>
+                                <div class="list-item" draggable="true" priority="{{com.priority}}" id="card_{{com.id}}">  {{com.title}} </div>
                             {% endif %}
                             {% endfor %}
                         </div>
@@ -175,7 +175,7 @@
                             <h4 style="text-align:center">In Progress</h4>
                                 {% for inc in incompletes %}
                                 {% if inc.sprint_id == sprint.sprint_num %}
-                                <div class="list-item" draggable="true" id="card_{{inc.id}}">  {{inc.title}} </div>
+                                <div class="list-item" draggable="true" priority="{{inc.priority}}" id="card_{{inc.id}}">  {{inc.title}} </div>
                                 {% endif %}
                                 {% endfor %}
                         </div>
@@ -183,7 +183,8 @@
                             <h4 style="text-align:center">Done</h4>
                             {% for com in completes %}
                             {% if com.sprint_id == sprint.sprint_num %}
-                                <div class="list-item" draggable="true" id="card_{{com.id}}">  {{com.title}} </div>
+                        <div class="list-item" draggable="true" priority="{{com.priority}}" id="card_{{com.id}}">  {{com.title}} </div>
+                                
                             {% endif %}
                             {% endfor %}
                         </div>
@@ -196,7 +197,8 @@
                         <div class = "list border border-dark rounded" id="backlog">
                             <h4 style="text-align:center">Backlog</h4>
                             {% for backlog in backlogs%}
-                            <div class = "list-item" draggable = "true" id="card{{loop.index}}">{{ backlog.description }}</div>
+                
+                            <div class = "list-item" draggable = "true" priority="{{backlog.priority}}" id="card_{{loop.index}}">{{ backlog.title }}</div>
                             {% endfor %}
                         </div>
                         <div class = "list">
@@ -208,7 +210,19 @@
         </div>
     </div>
 </div>
-
+<nav id="context-menu" class="context-menu">
+    <ul class="context-menu__items">
+      <li class="context-menu__item">
+        <a href="#" class="context-menu__link" data-action="Set Priority"><i class="fa fa-eye"></i> Set Priority</a>
+      </li>
+      <li class="context-menu__item">
+        <a href="#" class="context-menu__link" data-action="Edit"><i class="fa fa-edit"></i> Edit Card</a>
+      </li>
+      <li class="context-menu__item">
+        <a href="#" class="context-menu__link" data-action="Delete"><i class="fa fa-times"></i> Delete Card</a>
+      </li>
+    </ul>
+  </nav>
 <script type="text/javascript">
     
     $(".nav-tabs").on("click", "a", function (e) {

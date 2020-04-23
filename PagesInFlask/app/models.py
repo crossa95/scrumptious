@@ -54,7 +54,7 @@ class Card(db.Model):
     status = db.Column(db.String(20), nullable=False, default = 'backlog')
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     sprint_id = db.Column(db.Integer, default = 0)
-
+    priority = db.Column(db.String(20), default = 'black')
     def __repr__(self):
         return f"Card('{self.title}', '{self.description}')"
 

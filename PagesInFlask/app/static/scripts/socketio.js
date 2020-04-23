@@ -131,3 +131,155 @@ socket.on('cardClick', data => {
     var element = document.getElementById(ele_id);
     element.innerText = new_text;
 })
+
+socket.on('cardDelete', json => {
+    ele_id = "card_"+String(json["card_id"])
+    var element = document.getElementById(ele_id);
+    console.log(element)
+    element.remove();
+})
+
+
+socket.on('cardPriority', json => {
+    ele_id = "card_"+String(json["card_id"])
+    var element = document.getElementById(ele_id);
+    console.log(element)
+    element.style.color = json['priority'];
+})
+/**
+   * Actions For Each ContextMenu Option
+   */
+  function menuItemListener( link ) {
+    console.log( "Card ID - " + CardInContext.getAttribute("data-id") + ", Card action - " + link.getAttribute("data-action"));
+    console.log(CardInContext)
+    project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    username = document.querySelector('#get-username').innerHTML;
+    if (link.getAttribute('data-action') == 'Edit'){
+        
+        CardInContext.addAttribute
+        
+        
+        card_id = CardInContext.id;
+        card_id = parseInt(card_id.replace("card_",""));
+        console.log(card_id)
+        socket.emit('cardEdit', project_id,username,card_id);
+    }
+    else if (link.getAttribute('data-action') == 'Delete'){
+        card_id = CardInContext.id;
+        card_id = parseInt(card_id.replace("card_",""));
+        console.log(card_id)
+        socket.emit('cardDelete', {'card_id':card_id});
+    }
+    else if(link.getAttribute('data-action') == 'Set Priority'){
+        card_id = CardInContext.id;
+        card_id = parseInt(card_id.replace("card_",""));
+        console.log(card_id)
+        socket.emit('cardPriority', {'card_id':card_id});
+    }
+    else{}
+    
+    toggleMenuOff();
+  }
+
+
+// Context Menu Setup Below
+function clickInsideElement( e, className ) {
+    var el = e.srcElement || e.target;
+    
+    if ( el.classList.contains(className) ) {
+      return el;
+    } else {
+      while ( el = el.parentNode ) {
+        if ( el.classList && el.classList.contains(className) ) {
+          return el;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  var contextMenuLinkClassName = "context-menu__link";
+  var contextMenuActive = "context-menu--active";
+
+  var taskItemClassName = "list-item";
+  var CardInContext;
+
+  var menu = document.querySelector("#context-menu");
+  var menuItems = menu.querySelectorAll(".context-menu__item");
+  var menuState = 0;
+
+  function init() {
+    contextListener();
+    clickListener();
+    keyupListener();
+    resizeListener();
+  }
+
+  /**
+   * Listens for contextmenu events.
+   */
+  function contextListener() {
+    document.addEventListener( "contextmenu", function(e) {
+      CardInContext = clickInsideElement( e, taskItemClassName );
+
+      if ( CardInContext ) {
+        e.preventDefault();
+        toggleMenuOn();
+        positionMenu(e);
+      } else {
+        CardInContext = null;
+        toggleMenuOff();
+      }
+    });
+  }
+
+  function clickListener() {
+    document.addEventListener( "click", function(e) {
+      var clickeElIsLink = clickInsideElement( e, contextMenuLinkClassName );
+
+      if ( clickeElIsLink ) {
+        e.preventDefault();
+        menuItemListener( clickeElIsLink );
+      } else {
+        var button = e.which || e.button;
+        if ( button === 1 ) {
+          toggleMenuOff();
+        }
+      }
+    });
+  }
+
+  function keyupListener() {
+    window.onkeyup = function(e) {
+      if ( e.keyCode === 27 ) {
+        toggleMenuOff();
+      }
+    }
+  }
+  function resizeListener() {
+    window.onresize = function(e) {
+      toggleMenuOff();
+    };
+  }
+
+  function toggleMenuOn() {
+    if ( menuState !== 1 ) {
+      menuState = 1;
+      menu.classList.add( contextMenuActive );
+    }
+  }
+
+  function toggleMenuOff() {
+    if ( menuState !== 0 ) {
+      menuState = 0;
+      menu.classList.remove( contextMenuActive );
+    }
+  }
+
+  function positionMenu(e) {
+    menu.style.left = "485px";
+    menu.style.top = "435px";
+  }
+
+  init();

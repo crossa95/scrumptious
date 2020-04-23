@@ -169,6 +169,31 @@ body {
   margin: 4px 0px;
 }
 
+.list-item[priority = 'black'] {
+  background-color: white;
+  border-radius: 8px;
+  padding: 15px 20px;
+  text-align: center;
+  margin: 4px 0px;
+  color:black;
+}
+.list-item[priority = 'blue'] {
+  background-color: white;
+  border-radius: 8px;
+  padding: 15px 20px;
+  text-align: center;
+  margin: 4px 0px;
+  color:blue;
+}
+.list-item[priority = 'red'] {
+  background-color: white;
+  border-radius: 8px;
+  padding: 15px 20px;
+  text-align: center;
+  margin: 4px 0px;
+  color: red;
+}
+
 .card {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); /* this adds the "card" effect */
   text-align: center;
@@ -338,4 +363,52 @@ input[type=text]:focus{
   width: 50px;
   height: 50px;
   border-radius: 50%;
+}
+
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,300);
+
+/* context menu */
+
+.context-menu {
+  display: none;
+  position: absolute;
+  z-index: 15;
+  padding: 12px 0;
+  width: 240px;
+  background-color: #fff;
+  border: solid 1px #dfdfdf;
+  box-shadow: 1px 1px 2px #cfcfcf;
+  box-sizing: border-box;
+
+}
+
+.context-menu--active {
+  display: block;
+}
+
+.context-menu__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.context-menu__item {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.context-menu__item:last-child {
+  margin-bottom: 0;
+}
+
+.context-menu__link {
+  display: block;
+  padding: 4px 12px;
+  color: #0066aa;
+  text-decoration: none;
+}
+
+.context-menu__link:hover {
+  color: #fff;
+  background-color: #0066aa;
 }

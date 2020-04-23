@@ -337,3 +337,27 @@ def cardClick(json):
         json = stmt.title
         ele_id = "card_"+ str(card_id)
         emit('cardClick', {'json':json, 'id':ele_id })
+
+@socketio.on('cardEdit')
+def cardEdit(card_id):
+    dosomething()
+
+@socketio.on('cardDelete')
+def cardDelete(json):
+    toDelete = db.session.query(Card).filter_by(id=json['card_id']).first_or_404()
+    db.session.delete(toDelete)
+    db.session.commit()
+    emit('cardDelete', {'card_id' : json['card_id']}, broadcast = True)
+
+
+@socketio.on('cardPriority')
+def cardPriority(json):
+    card = db.session.query(Card).filter_by(id=json['card_id']).first_or_404()
+    if card.priority == 'black':
+        card.priority = 'red'
+    elif card.priority == 'red':
+        card.priority = 'blue'
+    else:
+        card.priority = 'black'
+    db.session.commit()
+    emit('cardPriority', {'card_id' : json['card_id'], 'priority':card.priority}, broadcast = True)
