@@ -154,7 +154,26 @@ socket.on('cardCreate', json => {
     element.draggable="true";
     element.id=ele_id;
     element.innerText = json['title'];
-    element.priority = json['priority'];
+    element.setAttribute("priority", json['priority']);
+    element.addEventListener('dragstart', function(){
+        draggedItem = element;
+        setTimeout(function () {
+            socket.emit('cardDragStart', element.id);            
+        }, 0);
+    });
+
+    element.addEventListener('dragend', function () {
+        setTimeout(function () {                        
+            //draggedItem = null;
+        }, 0);
+    });
+    
+    element.addEventListener('click', function() {
+        card_id = element.id;
+        card_id = parseInt(card_id.replace("card_",""));
+
+        socket.emit('cardClick', {'id':card_id, 'displayed':element.innerText});
+    });
     console.log(element)
     document.querySelector("#backlog_1").appendChild(element);
 

@@ -237,12 +237,11 @@ def create_card(project_id, username):
     form = CardForm()
     if form.validate_on_submit():
         card = Card(title=form.title.data, description=form.description.data, author=project)
-        id = card.id
-        title = form.title.data
         db.session.add(card)
         db.session.commit()
+        ident = card.id
         flash('You have successfully created a new card', 'success')
-        socketio.emit('cardCreate', {'card_id' : id, 'priority':'black', 'title':title}, broadcast = True)
+        socketio.emit('cardCreate', {'card_id' : ident, 'priority':'black', 'title':form.title.data}, broadcast = True)
         return redirect(url_for('project',project_id=project.id, username=current_user.username))
 
     return render_template('create_card.html', title='Create Card', form=form, legend = 'Create Card')
