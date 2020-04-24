@@ -311,7 +311,7 @@ def addSprint(json):
     toAdd = Sprint(project_id=json["id"], sprint_num = json["sprint"])
     db.session.add(toAdd)
     db.session.commit()
-    emit('sprintCreate', {'sprint_num = json["sprint"]'}, broadcast = True) 
+    emit('sprintCreate', {'sprint_num' : json["sprint"], 'project_id' : json["id"]}, broadcast = True) 
     
 @socketio.on('cardClick')
 def cardClick(json):

@@ -235,6 +235,7 @@ body {
   text-align: center;
   margin: 4px 1vw;
   color:black;
+  overflow-wrap: break-word;
 }
 .list-item[priority = 'blue'] {
   background-color: white;
@@ -244,6 +245,7 @@ body {
   margin: 4px 1vw;
   color:blue;
   width: 30vw;
+  overflow-wrap: break-word;
 }
 .list-item[priority = 'red'] {
   background-color: white;
@@ -253,6 +255,7 @@ body {
   margin: 4px 1vw;
   color: red;
   width: 30vw;
+  overflow-wrap: break-word;
 }
 
 .card {
