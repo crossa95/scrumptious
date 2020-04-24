@@ -147,7 +147,7 @@
                             <div class="list-item" draggable="true" id="card{{loop.index}}">  {{ backlog.description }} </div>
                             {% endfor %}
                         </div> -->                        
-                        <div class = "list" id="ip_1">
+                        <div class = "list" for ='In Progress' id="ip_1">
                             <h4 style="text-align:center">In Progress</h4>
                             {% for inc in incompletes %}
                             {% if inc.sprint_id == 1 %}
@@ -155,7 +155,7 @@
                             {% endif %}
                             {% endfor %}
                         </div>
-                        <div class = "list" id="done_1">
+                        <div class = "list" for= "Done" id="done_1">
                             <h4 style="text-align:center">Done</h4>
                             {% for com in completes %}
                             {% if com.sprint_id == 1 %}
@@ -167,9 +167,9 @@
                 </div>
                 {% for sprint in sprints %}       
                 {% if sprint.sprint_num != 1 %}
-                <div class="tab-pane" id="sprint_{{ sprint.sprint_num }}">
+                <div class="tab-pane"  id="sprint_{{ sprint.sprint_num }}">
                     <div class = "lists">
-                        <div class = "list" id="ip_{{sprint.sprint_num}}">
+                        <div class = "list" for="In Progress" id="ip_{{sprint.sprint_num}}">
                             <h4 style="text-align:center">In Progress</h4>
                                 {% for inc in incompletes %}
                                 {% if inc.sprint_id == sprint.sprint_num %}
@@ -177,7 +177,7 @@
                                 {% endif %}
                                 {% endfor %}
                         </div>
-                        <div class = "list" id="done_{{ sprint.sprint_num }}">
+                        <div class = "list" for="Done" id="done_{{ sprint.sprint_num }}">
                             <h4 style="text-align:center">Done</h4>
                             {% for com in completes %}
                             {% if com.sprint_id == sprint.sprint_num %}
