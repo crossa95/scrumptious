@@ -190,6 +190,18 @@ socket.on('sprintCreate', json => {
 
         if (newSprint.innerText != document.querySelector("#board > div > ul").lastElementChild.previousElementSibling.innerText){
             nav.insertBefore(newSprint,document.querySelector("#board > div > ul").lastElementChild);
+            $('.tab-content').append(
+                '<div class="tab-pane" id="sprint_' + json['sprint_id'] + '">' +
+                    '<div class = "lists">' +
+                        '<div class = "list" for="In Progress" id=ip_' + json['sprint_id'] + '>' +
+                            '<h4 style="text-align:center">In Progress</h4>' +
+                        '</div>' +
+                        '<div class = "list" for="done" id=done_' + json['sprint_id'] + '>' +
+                            '<h4 style="text-align:center">Done</h4>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>');
+            }
         }
         $(".nav-tabs").on("click", "a", function (e) {
             e.preventDefault();
@@ -203,18 +215,7 @@ socket.on('sprintCreate', json => {
             $(this).parent().remove();
             $(".nav-tabs li").children('a').first().click();
         });
-        $('.tab-content').append(
-            '<div class="tab-pane" id="sprint_' + json['sprint_id'] + '">' +
-                '<div class = "lists">' +
-                    '<div class = "list" for="In Progress" id=ip_' + json['sprint_id'] + '>' +
-                        '<h4 style="text-align:center">In Progress</h4>' +
-                    '</div>' +
-                    '<div class = "list" for="done" id=done_' + json['sprint_id'] + '>' +
-                        '<h4 style="text-align:center">Done</h4>' +
-                    '</div>' +
-                '</div>' +
-            '</div>');
-        }
+        
         const list_items = document.querySelectorAll('.list-item');
         const lists = document.querySelectorAll('.list');
 
