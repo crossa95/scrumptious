@@ -135,7 +135,6 @@ socket.on('cardClick', data => {
 socket.on('cardDelete', json => {
     ele_id = "card_"+String(json["card_id"])
     var element = document.getElementById(ele_id);
-    console.log(element)
     element.remove();
 })
 
@@ -143,7 +142,6 @@ socket.on('cardDelete', json => {
 socket.on('cardPriority', json => {
     ele_id = "card_"+String(json["card_id"])
     var element = document.getElementById(ele_id);
-    console.log(element)
     element.style.color = json['priority'];
 })
 
@@ -292,12 +290,12 @@ function clickInsideElement( e, className ) {
   function contextListener() {
     document.addEventListener( "contextmenu", function(e) {
       CardInContext = clickInsideElement( e, taskItemClassName );
-
+      positionX = CardInContext.getBoundingClientRect().right;
+      positionY = CardInContext.getBoundingClientRect().y;
       if ( CardInContext ) {
         e.preventDefault();
         toggleMenuOn();
-        positionMenu(e);
-        console.log(e)
+        positionMenu(positionX,positionY);
       } else {
         CardInContext = null;
         toggleMenuOff();
@@ -348,11 +346,9 @@ function clickInsideElement( e, className ) {
     }
   }
   
-  function positionMenu(e) {
-    /* xcord = String(e.clientX) + "px";
-    ycord = String(e.clientY) + "px"; */
-    menu.style.left = "485px";
-    menu.style.top = "435px";
+  function positionMenu(x,y) { 
+    menu.style.left = String(x)+"px";
+    menu.style.top = String(y-100)+"px";
   }
 
   init();

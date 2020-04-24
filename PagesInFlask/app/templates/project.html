@@ -129,9 +129,9 @@
                 </li>
             </ul>
 
-            <div class = "lists">  <!-- Moved this so the backlog is persistant across all tab panes -->
-                <div class = "list border border-dark rounded" id="backlog_1">
-                    <h4 style="text-align:center">Backlog</h4>
+            <div class = "lists" for="backlog">  <!-- Moved this so the backlog is persistant across all tab panes -->
+                <div class = "list" for='backlog' id="backlog_1">
+                    <h9 style="text-align:center">Backlog</h9>
                     {% for backlog in backlogs%}
                     <div class="list-item" draggable="true" priority="{{backlog.priority}}" id="card_{{backlog.id}}">  {{ backlog.title }} </div>
                     {% endfor %}
