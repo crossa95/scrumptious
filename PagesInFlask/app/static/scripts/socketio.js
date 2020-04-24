@@ -197,13 +197,21 @@ socket.on('sprintCreate', json => {
                 '<div class = "list" for="In Progress" id=ip_' + json['sprint_id'] + '>' +
                     '<h4 style="text-align:center">In Progress</h4>' +
                 '</div>' +
-                '<div class = "list" for="done" id=done_' + json['sprint_id'] + '>' +
+                '<div class = "list" for="Done" id=done_' + json['sprint_id'] + '>' +
                     '<h4 style="text-align:center">Done</h4>' +
                 '</div>' +
             '</div>';
             newContent.innerHTML = string2;
             document.querySelector("#board > div > div.tab-content").append(newContent);
             }
+            newSprint.addEventListener("click", function () {
+                oldactive = document.getElementsByClassName("tab-pane active")[1];
+                panes = document.getElementsByClassName("tab-pane");
+                newactive = panes.namedItem("sprint_"+json['sprint_id']);
+                oldactive.className = "tab-pane";
+                newactive.className = "tab-pane active";
+
+            });
         }
         $(".nav-tabs").on("click", "a", function (e) {
             e.preventDefault();
@@ -216,6 +224,7 @@ socket.on('sprintCreate', json => {
             $(anchor.attr('href')).remove();
             $(this).parent().remove();
             $(".nav-tabs li").children('a').first().click();
+
         });
         
         const list_items = document.querySelectorAll('.list-item');
