@@ -180,37 +180,100 @@ socket.on('cardCreate', json => {
 })
 
 socket.on('sprintCreate', json => {
-    ele_id = "card_"+String(json["card_id"])
-    element = document.createElement("div");
-    element.classList="list-item";
-    element.draggable="true";
-    element.id=ele_id;
-    element.innerText = json['title'];
-    element.setAttribute("priority", json['priority']);
-    element.addEventListener('dragstart', function(){
-        draggedItem = element;
-        setTimeout(function () {
-            socket.emit('cardDragStart', element.id);            
-        }, 0);
+    project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    if (json['project_id'] == project_id){
+        nav =  document.querySelector("#board > div > ul");
+        newSprint = document.createElement("li");
+        newSprint.className = "nav-item";
+        string1 = '<a class = "nav-link" href="#sprint_"'+json['sprint_id']+' data-toggle="tab" >Sprint '+json['sprint_id']+'</a></li>'
+        newSprint.innerHTML = string1;
+
+        if (newSprint.innerText != document.querySelector("#board > div > ul").lastElementChild.previousElementSibling.innerText){
+            nav.insertBefore(newSprint,document.querySelector("#board > div > ul").lastElementChild);
+        }
+        $(".nav-tabs").on("click", "a", function (e) {
+            e.preventDefault();
+            if (!$(this).hasClass('add-contact')) {
+                $(this).tab('show');
+            }
+        })
+        .on("click", "span", function () {
+            var anchor = $(this).siblings('a');
+            $(anchor.attr('href')).remove();
+            $(this).parent().remove();
+            $(".nav-tabs li").children('a').first().click();
+        });
+        $('.tab-content').append(
+            '<div class="tab-pane" id="sprint_' + json['sprint_id'] + '">' +
+                '<div class = "lists">' +
+                    '<div class = "list" for="In Progress" id=ip_' + json['sprint_id'] + '>' +
+                        '<h4 style="text-align:center">In Progress</h4>' +
+                    '</div>' +
+                    '<div class = "list" for="done" id=done_' + json['sprint_id'] + '>' +
+                        '<h4 style="text-align:center">Done</h4>' +
+                    '</div>' +
+                '</div>' +
+            '</div>');
+        }
+        const list_items = document.querySelectorAll('.list-item');
+        const lists = document.querySelectorAll('.list');
+
+        let draggedItem = null;
+        for (let i = 0; i<list_items.length; i++){
+            const item = list_items[i];
+
+            item.addEventListener('dragstart', function(){
+                draggedItem = item;
+                setTimeout(function () {
+                    socket.emit('cardDragStart', item.id);            
+                }, 0);
+            });
+
+            item.addEventListener('dragend', function () {
+                setTimeout(function () {                        
+                    //draggedItem = null;
+                }, 0);
+            });
+            
+            item.addEventListener('click', function() {
+                card_id = item.id;
+                card_id = parseInt(card_id.replace("card_",""));
+
+                socket.emit('cardClick', {'id':card_id, 'displayed':item.innerText});
+            });
+
+            for (let j = 0; j < lists.length; j++){
+                const list = lists[j];
+                list.addEventListener('dragover', function (e) {
+                    e.preventDefault();
+                });
+                list.addEventListener('dragenter', function (e) {
+                    e.preventDefault();
+                    this.style.backgroundColor = '#d2d6d6';
+                });
+                list.addEventListener('dragleave', function (e){
+                    this.style.backgroundColor = '#eaeded';
+                });
+                list.addEventListener('drop', function (e) {
+                    let element = this;          
+                    let newSprint = element.id.split("_"); /* default to the backlog */
+                    let status = 'backlog';
+                    let stReg = /ip/;
+                    if(stReg.test(element.id)){
+                        status = 'incomplete';   /* Reg expressions to identify the new status */
+                    }
+                    stReg = /done/;
+                    if(stReg.test(element.id)){
+                        status = 'complete';
+                    }
+                    this.append(draggedItem);
+                    this.style.backgroundColor = '#eaeded';
+                    socket.emit('cardDrop', { 'id': draggedItem.id, 'parent':element.id,
+                    'status':status, "newSprint": newSprint[1]});
+                });
+            }
+        }
     });
-
-    element.addEventListener('dragend', function () {
-        setTimeout(function () {                        
-            //draggedItem = null;
-        }, 0);
-    });
-    
-    element.addEventListener('click', function() {
-        card_id = element.id;
-        card_id = parseInt(card_id.replace("card_",""));
-
-        socket.emit('cardClick', {'id':card_id, 'displayed':element.innerText});
-    });
-    console.log(element)
-    document.querySelector("#backlog_1").appendChild(element);
-
-})
-
 
 
 
@@ -290,9 +353,9 @@ function clickInsideElement( e, className ) {
   function contextListener() {
     document.addEventListener( "contextmenu", function(e) {
       CardInContext = clickInsideElement( e, taskItemClassName );
-      positionX = CardInContext.getBoundingClientRect().right;
-      positionY = CardInContext.getBoundingClientRect().y;
       if ( CardInContext ) {
+        positionX = CardInContext.getBoundingClientRect().right;
+        positionY = CardInContext.getBoundingClientRect().y;
         e.preventDefault();
         toggleMenuOn();
         positionMenu(positionX,positionY);

@@ -312,7 +312,7 @@ def addSprint(json):
     db.session.add(toAdd)
     db.session.commit()
     print(json["sprint"])
-    #emit('sprintCreate', {'sprint_num' : json["sprint"], 'project_id' : json["id"]}, broadcast = True) 
+    emit('sprintCreate', {'sprint_id' : json["sprint"], 'project_id' : json["id"]}, broadcast = True) 
     
 @socketio.on('cardClick')
 def cardClick(json):
@@ -351,7 +351,3 @@ def cardPriority(json):
     db.session.commit()
     emit('cardPriority', {'card_id' : json['card_id'], 'priority':card.priority}, broadcast = True)
 
-""" @socketio.on('cardCreate')
-def cardCreate(json):
-    emit('cardPriority', {'card_id' : json['card_id'], 'priority':'black', 'title':json['title']}, broadcast = True)
- """
