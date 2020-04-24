@@ -241,7 +241,7 @@ def create_card(project_id, username):
         db.session.commit()
         ident = card.id
         flash('You have successfully created a new card', 'success')
-        socketio.emit('cardCreate', {'card_id' : ident, 'priority':'black', 'title':form.title.data}, broadcast = True)
+        socketio.emit('cardCreate', {'card_id' : ident, 'priority':'black', 'title':form.title.data, 'project_id':project_id}, broadcast = True)
         return redirect(url_for('project',project_id=project.id, username=current_user.username))
 
     return render_template('create_card.html', title='Create Card', form=form, legend = 'Create Card')
@@ -310,7 +310,8 @@ def cardDrop(json):
 def addSprint(json):
     toAdd = Sprint(project_id=json["id"], sprint_num = json["sprint"])
     db.session.add(toAdd)
-    db.session.commit() 
+    db.session.commit()
+    emit('sprintCreate', {'sprint_num = json["sprint"]'}, broadcast = True) 
     
 @socketio.on('cardClick')
 def cardClick(json):

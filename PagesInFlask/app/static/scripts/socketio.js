@@ -148,35 +148,37 @@ socket.on('cardPriority', json => {
 })
 
 socket.on('cardCreate', json => {
-    ele_id = "card_"+String(json["card_id"])
-    element = document.createElement("div");
-    element.classList="list-item";
-    element.draggable="true";
-    element.id=ele_id;
-    element.innerText = json['title'];
-    element.setAttribute("priority", json['priority']);
-    element.addEventListener('dragstart', function(){
-        draggedItem = element;
-        setTimeout(function () {
-            socket.emit('cardDragStart', element.id);            
-        }, 0);
-    });
+    if (json['project_id'] == project_id){
+        ele_id = "card_"+String(json["card_id"])
+        element = document.createElement("div");
+        element.classList="list-item";
+        element.draggable="true";
+        element.id=ele_id;
+        element.innerText = json['title'];
+        element.setAttribute("priority", json['priority']);
+        element.addEventListener('dragstart', function(){
+            draggedItem = element;
+            setTimeout(function () {
+                socket.emit('cardDragStart', element.id);            
+            }, 0);
+        });
 
-    element.addEventListener('dragend', function () {
-        setTimeout(function () {                        
-            //draggedItem = null;
-        }, 0);
-    });
+        element.addEventListener('dragend', function () {
+            setTimeout(function () {                        
+                //draggedItem = null;
+            }, 0);
+        });
+        
+        element.addEventListener('click', function() {
+            card_id = element.id;
+            card_id = parseInt(card_id.replace("card_",""));
+
+            socket.emit('cardClick', {'id':card_id, 'displayed':element.innerText});
+        });
+        console.log(element)
+        document.querySelector("#backlog_1").appendChild(element);
+    }
     
-    element.addEventListener('click', function() {
-        card_id = element.id;
-        card_id = parseInt(card_id.replace("card_",""));
-
-        socket.emit('cardClick', {'id':card_id, 'displayed':element.innerText});
-    });
-    console.log(element)
-    document.querySelector("#backlog_1").appendChild(element);
-
 })
 
 socket.on('sprintCreate', json => {
@@ -295,6 +297,7 @@ function clickInsideElement( e, className ) {
         e.preventDefault();
         toggleMenuOn();
         positionMenu(e);
+        console.log(e)
       } else {
         CardInContext = null;
         toggleMenuOff();
@@ -344,10 +347,14 @@ function clickInsideElement( e, className ) {
       menu.classList.remove( contextMenuActive );
     }
   }
-
+  
   function positionMenu(e) {
+    /* xcord = String(e.clientX) + "px";
+    ycord = String(e.clientY) + "px"; */
     menu.style.left = "485px";
     menu.style.top = "435px";
   }
 
   init();
+
+  
