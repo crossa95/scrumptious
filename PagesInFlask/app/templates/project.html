@@ -225,7 +225,7 @@
 
 $('.add-contact').click(function (e) {
     e.preventDefault();
-    var id = $(".nav-tabs").children().length-1; //think about it ;)
+    var id = $(".nav-tabs").children().length; //think about it ;)
     var tabId = 'contact_' + id;
     $(this).closest('li').before('<li class ="nav-item"><a class = "nav-link" href="#sprint_' +
                                      id + '" data-toggle="tab" >Sprint ' + id + '</a></li>');
