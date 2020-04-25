@@ -337,7 +337,7 @@ socket.on('sprintCreate', json => {
             positionX = CardInContext.getBoundingClientRect().right;
             positionY = CardInContext.getBoundingClientRect().y;
             console.log(CardInContext)
-            $('.card-popup').css("left" , String(positionX+10)+"px");
+            $('.card-popup').css("left" , String(positionX-100)+"px");
             $('.card-popup').css("top" , String(positionY-150)+"px");
 
             openForm();
