@@ -314,11 +314,20 @@ socket.on('deleteSprint', json =>{
                 if (this.className == "nav-link active"){
                     this.parentElement.remove();
                     this.remove();
-                    $( "a" ).each(function(){
-                        if(this.innerText.includes("Sprint 1")){
-                            this.click();
-                        }
-                    })
+                    if (json['id'] == "Sprint 1"){
+                        $( "a" ).each(function(){
+                            if(this.innerText.includes("Sprint 2")){
+                                this.click();
+                            }
+                        })
+                    }
+                    else{
+                        $( "a" ).each(function(){
+                            if(this.innerText.includes("Sprint 1")){
+                                this.click();
+                            }
+                        })
+                    }
                 }
                 else{
                     this.parentElement.remove();
