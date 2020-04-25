@@ -373,3 +373,30 @@ def cardInfo(json):
     card = db.session.query(Card).filter_by(id=json['card_id']).first_or_404()
     info = [card.title,card.description]
     emit('cardInfo',{'title':card.title,'description':card.description,'card_id':json['card_id']})
+
+@socketio.on('sprintDelete')
+def sprintDelete(json):
+    sprints = db.session.query(Sprint).filter_by(project_id=json['project_id']).all()
+    for spr in sprints:
+        if spr.sprint_num == int(json['sprintNum']):
+            cards_in_sprint = db.session.query(Card).filter_by(sprint_id=json['sprintNum'],project_id=json['project_id']).all()
+            for card in cards_in_sprint:
+                card.status = 'backlog'
+                card.sprint_id = 0
+                db.session.commit()
+                card_id = 'card_'+str(card.id)
+                emit('cardReset', {'id':card_id}, broadcast=True)
+            db.session.delete(spr)
+            db.session.commit()
+            sprintID = 'Sprint '+str(json['sprintNum'])
+            emit('deleteSprint',{'id':sprintID,'project_id':json['project_id']},broadcast = True)
+        if spr.sprint_num > int(json['sprintNum']):
+            cards_in_sprint = db.session.query(Card).filter_by(sprint_id=spr.sprint_num,project_id=json['project_id']).all()
+            for card in cards_in_sprint:
+                card.sprint_id = card.sprint_id -1
+                db.session.commit()
+            sprintID = 'Sprint '+str(spr.sprint_num)
+            newsprintID = 'Sprint '+str(spr.sprint_num - 1)
+            spr.sprint_num = spr.sprint_num -1
+            db.session.commit()
+            emit('sprintDecrement',{'project_id':json['project_id'],'id':sprintID,'new_id':newsprintID},broadcast = True)

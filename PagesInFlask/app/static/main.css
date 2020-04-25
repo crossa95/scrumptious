@@ -2,6 +2,7 @@ body {
     background: #fafafa;
     color: #333333;
     margin-top: 5rem;
+    scroll ;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -35,7 +36,7 @@ body {
     padding: 10px 20px;
     border: 1px solid #dddddd;
     border-radius: 3px;
-    margin-bottom: 20px;
+    
   }
 
   .article-title {
@@ -149,7 +150,6 @@ body {
   display: flex;
   flex: 1;
   width: 85vw;
-  
 }
 
 .lists .list {
@@ -215,6 +215,7 @@ body {
   text-align: center;
   margin: 4px 0px;
   align-content: center;
+  margin-bottom: 4vh;
 }
 
 .lists[for='backlog'] {
@@ -225,6 +226,10 @@ body {
   align-content: center;
   margin: 4px 0px;
   overflow-y: auto;
+}
+
+.list-item{
+  cursor:grab;
 }
 
 .list-item[priority = 'black'] {
@@ -297,6 +302,7 @@ body {
 }
 
 #sidebar p:hover {
+  cursor:pointer;
   background-color: #ffc107;
 }
 
@@ -478,6 +484,27 @@ input[type=text]:focus{
   background-color: #0066aa;
 }
 
+.sprint-popup {
+  display:none;
+  position: absolute;
+  left: 235px;
+  top:333px;
+  height:3vh;
+  background-color:red;
+  border-radius: 7px;
+  overflow-wrap: normal;
+}
+
+.sprint-popup .context-menu__item {
+  opacity: 0.8;
+}
+
+.sprint-popup .context-menu__link:hover {
+  color: #fff;
+  background-color: red;
+  border-radius: 7px;
+  opacity: 1;
+}
 
 /* The popup chat - hidden by default */
 .card-popup {
@@ -486,17 +513,16 @@ input[type=text]:focus{
   border: 3px solid #f1f1f1;
   z-index: 14;
   width: 25vw;
-  min-height:30vw;
+  max-height:30vw;
   overflow:auto;
   padding: 10px;
   background-color: white;
   border-radius: 1vw;
 }
 .card-popup::-webkit-scrollbar { 
-  display: none;  /* Safari and Chrome */
+  display: none; 
 }
 
-/* Full-width textarea */
 .card-popup textarea {
   width: 100%;
   padding: 15px;
@@ -506,13 +532,11 @@ input[type=text]:focus{
   min-height: 2vw;
 }
 
-/* When the textarea gets focus, do something */
 .card-popup textarea:focus {
   background-color: #ddd;
   outline: none;
 }
 
-/* Set a style for the submit/send button */
 .card-popup .btn {
   background-color: #4CAF50;
   color: white;
@@ -524,12 +548,10 @@ input[type=text]:focus{
   opacity: 0.8;
 }
 
-/* Add a red background color to the cancel button */
 .card-popup .cancel {
   background-color: red;
 }
 
-/* Add some hover effects to buttons */
 .card-popup .btn:hover, .open-button:hover {
   opacity: 1;
 }

@@ -112,16 +112,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 })
 
-socket.on('cardDragging', data  => {        
+socket.on('cardDragging', data  => {      
     var element = document.getElementById(data);
     element.style.opacity = 0.2;
 })
 
-socket.on('cardDrop', data => {        
+socket.on('cardDrop', data => {       
     var element = document.getElementById(data.id);
     element.style.opacity = 1.0;
     document.getElementById(data.parent).append(element);
     
+})
+
+socket.on('cardReset',data => {       
+    var element = document.getElementById(data['id']);
+    document.querySelector("#backlog_1").append(element);
 })
 
 socket.on('cardClick', data => {
@@ -159,6 +164,7 @@ socket.on('cardPriority', json => {
 })
 
 socket.on('cardCreate', json => {
+    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     if (json['project_id'] == project_id){
         ele_id = "card_"+String(json["card_id"])
         element = document.createElement("div");
@@ -299,27 +305,65 @@ socket.on('sprintCreate', json => {
             }
         }
     });
-    function getData(){
+
+socket.on('deleteSprint', json =>{
+    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    if(json['project_id'] == project_id){
+        $( "a" ).each(function() {
+            if(this.innerText == json['id']){
+                if (this.className == "nav-link active"){
+                    this.parentElement.remove();
+                    this.remove();
+                    $( "a" ).each(function(){
+                        if(this.innerText.includes("Sprint 1")){
+                            this.click();
+                        }
+                    })
+                }
+                else{
+                    this.parentElement.remove();
+                    this.remove();
+                }
+                
+            }
+          });
+        
+        
+    }
+});
+
+socket.on('sprintDecrement', json =>{
+    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    console.log(json["id"])
+    console.log(json['new_id'])
+    if(json['project_id'] == project_id){
+        $( "a" ).each(function() {
+            if(this.innerText == json['id']){
+                this.innerText = json['new_id'] 
+            }
+          });
+    }
+})
+
+function getData(){
         newtitle = document.querySelector("#myForm > textarea").value;
         newdescription = document.querySelector("#myForm > textarea:nth-child(4)").value;
         document.getElementById("myForm").style.display = "none";
         card_id = document.getElementById("myForm").card;
         socket.emit('cardEdit',{'new_title':newtitle,'new_description':newdescription,'card_id':card_id});
-    }
+}
 
-    function openForm() {
+function openForm() {
         document.getElementById("myForm").style.display = "block";
-    }
+}
 
-    function closeForm() {
+function closeForm() {
         document.getElementById("myForm").style.display = "none";
-    }
+}
 /**
    * Actions For Each ContextMenu Option
    */
-  function menuItemListener( link ) {
-    console.log( "Card ID - " + CardInContext.getAttribute("data-id") + ", Card action - " + link.getAttribute("data-action"));
-    console.log(CardInContext)
+function menuItemListener( link ) {
     project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     username = document.querySelector('#get-username').innerHTML;
     if (link.getAttribute('data-action') == 'Edit'){
@@ -356,10 +400,19 @@ socket.on('sprintCreate', json => {
         console.log(card_id)
         socket.emit('cardPriority', {'card_id':card_id});
     }
+    else if(link.getAttribute('data-action')=='Delete Sprint'){
+        sprintNum = SprintInContext.innerText.replace("Sprint ","");
+        numSprints = $(".nav-tabs").children().length - 1;
+        if (numSprints != 1){
+            console.log("emitted sprintDelete")
+            const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+            socket.emit('sprintDelete',{'project_id':project_id,'numSprints':numSprints,'sprintNum':sprintNum})
+        }
+    }
     else{}
     
     toggleMenuOff();
-  }
+}
 
 
 // Context Menu Setup Below
@@ -377,45 +430,60 @@ function clickInsideElement( e, className ) {
     }
 
     return false;
-  }
+}
 
   var contextMenuLinkClassName = "context-menu__link";
   var contextMenuActive = "context-menu--active";
 
-  var taskItemClassName = "list-item";
+  var CardItemClassName = "list-item";
   var CardInContext;
+
+  var SprintItemClassName = "nav-link";
+  var SprintInContext;
 
   var menu = document.querySelector("#context-menu");
   var menuItems = menu.querySelectorAll(".context-menu__item");
   var menuState = 0;
 
-  function init() {
+function init() {
     contextListener();
     clickListener();
     keyupListener();
     resizeListener();
-  }
+}
 
   /**
    * Listens for contextmenu events.
    */
-  function contextListener() {
+function contextListener() {
     document.addEventListener( "contextmenu", function(e) {
-      CardInContext = clickInsideElement( e, taskItemClassName );
+      CardInContext = clickInsideElement( e, CardItemClassName );
+      SprintInContext = clickInsideElement(e,SprintItemClassName);
       if ( CardInContext ) {
         positionX = CardInContext.getBoundingClientRect().right;
         positionY = CardInContext.getBoundingClientRect().y;
         e.preventDefault();
         toggleMenuOn();
         positionMenu(positionX,positionY);
-      } else {
+      }
+      else if (SprintInContext){
+        if (SprintInContext.text.includes("Sprint ")){
+            console.log(SprintInContext)
+            e.preventDefault();
+            SprintInContext.click();
+            toggleSprintPopMenuOn();
+        }
+      }
+      else {
         CardInContext = null;
+        SprintInContext = null;
         toggleMenuOff();
+        toggleSprintPopMenuOff();
       }
     });
-  }
+}
 
-  function clickListener() {
+function clickListener() {
     document.addEventListener( "click", function(e) {
       var clickeElIsLink = clickInsideElement( e, contextMenuLinkClassName );
 
@@ -426,6 +494,7 @@ function clickInsideElement( e, className ) {
         var button = e.which || e.button;
         if ( button === 1 ) {
           toggleMenuOff();
+          toggleSprintPopMenuOff();
         }
       }
       var clickEIsPopUp = clickInsideElement(e,"card-popup");
@@ -438,41 +507,48 @@ function clickInsideElement( e, className ) {
           closeForm();
         }
     }
+        
+        
     });
-  }
+}
 
-  function keyupListener() {
+function keyupListener() {
     window.onkeyup = function(e) {
       if ( e.keyCode === 27 ) {
         toggleMenuOff();
       }
     }
-  }
-  function resizeListener() {
+}
+function resizeListener() {
     window.onresize = function(e) {
       toggleMenuOff();
     };
-  }
+}
 
-  function toggleMenuOn() {
+function toggleMenuOn() {
     if ( menuState !== 1 ) {
       menuState = 1;
       menu.classList.add( contextMenuActive );
     }
-  }
+}
 
-  function toggleMenuOff() {
+function toggleMenuOff() {
     if ( menuState !== 0 ) {
       menuState = 0;
       menu.classList.remove( contextMenuActive );
     }
-  }
+}
   
-  function positionMenu(x,y) { 
+function positionMenu(x,y) { 
     menu.style.left = String(x)+"px";
     menu.style.top = String(y-100)+"px";
-  }
-
-  init();
-
+}
   
+function toggleSprintPopMenuOn(){
+    document.getElementById("sprint-pop").style.display = "block";
+}
+function toggleSprintPopMenuOff(){
+    document.getElementById("sprint-pop").style.display = "none";
+}
+
+init();
