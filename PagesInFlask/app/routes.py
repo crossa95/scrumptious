@@ -328,8 +328,25 @@ def cardClick(json):
         emit('cardClick', {'json':json, 'id':ele_id })
 
 @socketio.on('cardEdit')
-def cardEdit(card_id):
-    dosomething()
+def cardEdit(json):
+    card = db.session.query(Card).filter_by(id=json['card_id']).first_or_404()
+    old_title = card.title
+    old_description = card.description
+    new_title = json['new_title']
+    new_description = json['new_description']
+    print(old_title)
+    print(new_title)
+    print(old_description)
+    print(new_description)
+    print(not new_title)
+    if new_title:
+        if new_description:
+            if old_title != new_title or old_description != new_description:
+                card.title = new_title
+                card.description = new_description
+                db.session.commit()
+                print('here')
+                emit('cardEdit',{'card_id':card.id,'new_title':new_title,'new_description':new_description,'old_title':old_title,'old_description':old_description}, broadcast = True)
 
 @socketio.on('cardDelete')
 def cardDelete(json):
@@ -351,3 +368,8 @@ def cardPriority(json):
     db.session.commit()
     emit('cardPriority', {'card_id' : json['card_id'], 'priority':card.priority}, broadcast = True)
 
+@socketio.on('cardInfo')
+def cardInfo(json):
+    card = db.session.query(Card).filter_by(id=json['card_id']).first_or_404()
+    info = [card.title,card.description]
+    emit('cardInfo',{'title':card.title,'description':card.description,'card_id':json['card_id']})

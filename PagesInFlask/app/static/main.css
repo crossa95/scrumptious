@@ -477,3 +477,59 @@ input[type=text]:focus{
   color: #fff;
   background-color: #0066aa;
 }
+
+
+/* The popup chat - hidden by default */
+.card-popup {
+  display: none;
+  position: fixed;
+  border: 3px solid #f1f1f1;
+  z-index: 14;
+  width: 25vw;
+  min-height:30vw;
+  overflow:auto;
+  padding: 10px;
+  background-color: white;
+  border-radius: 1vw;
+}
+.card-popup::-webkit-scrollbar { 
+  display: none;  /* Safari and Chrome */
+}
+
+/* Full-width textarea */
+.card-popup textarea {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  background: #f1f1f1;
+  resize: none;
+  min-height: 2vw;
+}
+
+/* When the textarea gets focus, do something */
+.card-popup textarea:focus {
+  background-color: #ddd;
+  outline: none;
+}
+
+/* Set a style for the submit/send button */
+.card-popup .btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 1px 1px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom:1px;
+  opacity: 0.8;
+}
+
+/* Add a red background color to the cancel button */
+.card-popup .cancel {
+  background-color: red;
+}
+
+/* Add some hover effects to buttons */
+.card-popup .btn:hover, .open-button:hover {
+  opacity: 1;
+}

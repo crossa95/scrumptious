@@ -132,8 +132,21 @@ socket.on('cardClick', data => {
     element.innerText = new_text;
 })
 
+socket.on('cardEdit',json => {
+    ele_id = "card_"+String(json['card_id']);
+    var element = document.getElementById(ele_id);
+    console.log(element);
+    shown = element.innerText;
+    if(shown == json['old_title']){
+        element.innerText = json['new_title'];
+    }
+    else{
+        element.innerText = json['new_description'];
+    }
+})
+
 socket.on('cardDelete', json => {
-    ele_id = "card_"+String(json["card_id"])
+    ele_id = "card_"+String(json["card_id"]);
     var element = document.getElementById(ele_id);
     element.remove();
 })
@@ -286,9 +299,21 @@ socket.on('sprintCreate', json => {
             }
         }
     });
+    function getData(){
+        newtitle = document.querySelector("#myForm > textarea").value;
+        newdescription = document.querySelector("#myForm > textarea:nth-child(4)").value;
+        document.getElementById("myForm").style.display = "none";
+        card_id = document.getElementById("myForm").card;
+        socket.emit('cardEdit',{'new_title':newtitle,'new_description':newdescription,'card_id':card_id});
+    }
 
+    function openForm() {
+        document.getElementById("myForm").style.display = "block";
+    }
 
-
+    function closeForm() {
+        document.getElementById("myForm").style.display = "none";
+    }
 /**
    * Actions For Each ContextMenu Option
    */
@@ -298,14 +323,26 @@ socket.on('sprintCreate', json => {
     project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     username = document.querySelector('#get-username').innerHTML;
     if (link.getAttribute('data-action') == 'Edit'){
-        
-        CardInContext.addAttribute
-        
-        
         card_id = CardInContext.id;
         card_id = parseInt(card_id.replace("card_",""));
-        console.log(card_id)
-        socket.emit('cardEdit', project_id,username,card_id);
+        socket.emit('cardInfo',{'card_id':card_id});
+        socket.on('cardInfo', json=>{
+            card_desc = json['description'];
+            card_title = json['title'];
+            console.log(card_desc)
+            console.log(card_title)
+            document.querySelector("#myForm > textarea").value = card_title;
+            document.querySelector("#myForm > textarea:nth-child(4)").value = card_desc;
+            document.getElementById("myForm").card = json['card_id'];
+            positionX = CardInContext.getBoundingClientRect().right;
+            positionY = CardInContext.getBoundingClientRect().y;
+            console.log(CardInContext)
+            $('.card-popup').css("left" , String(positionX+10)+"px");
+            $('.card-popup').css("top" , String(positionY-150)+"px");
+
+            openForm();
+        });
+        
     }
     else if (link.getAttribute('data-action') == 'Delete'){
         card_id = CardInContext.id;
@@ -391,6 +428,16 @@ function clickInsideElement( e, className ) {
           toggleMenuOff();
         }
       }
+      var clickEIsPopUp = clickInsideElement(e,"card-popup");
+      if (clickEIsPopUp){
+          // do nothing
+      }
+      else {
+        var button = e.which || e.button;
+        if ( button === 1 ) {
+          closeForm();
+        }
+    }
     });
   }
 
