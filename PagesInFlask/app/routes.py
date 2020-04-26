@@ -273,7 +273,9 @@ def message(data):
     message = Chat_History(message=data['msg'],username = data['username'],room =data['room'], project_id = data['project_id'])
     db.session.add(message)
     db.session.commit()
-    send({'msg': data['msg'], 'username': data['username'], 'time_stamp': strftime('%b-%d %I:%M%p', localtime())}, room=data['room_displayed'])
+    emit('message',{'msg': data['msg'], 'username': data['username'], 'time_stamp': strftime('%b-%d %I:%M%p', localtime()),'room':data['room']}, room=data['room_displayed'])
+    #if(data['username'] == )
+    
 
 def myconverter(time):
     time = datetime.strftime(time,'%b-%d %I:%M%p')
@@ -281,18 +283,20 @@ def myconverter(time):
 
 @socketio.on('join')
 def join(data):
+    print(data['room'])
     join_room(data['room'])
     messages = Chat_History.query.filter_by(project_id = data['project_id'], room = data['room'] ).all()
     for msg in messages:
         time = json.dumps(msg.time_stamp, default = myconverter)
         time = time.strip('"')
-        send({'msg': msg.message, 'username':msg.username, 'time_stamp': time,'room':data['display_name']})
+        send({'msg': msg.message, 'username':msg.username, 'time_stamp': time,'room':data['room']})
     send({'msg': data['username'] + " has joined the room."}, room=data['room'])
 
 @socketio.on('leave')
 def leave(data):
+    print(data['room'])
     leave_room(data['room'])
-    send({'msg': data['username'] + " has left the " + data['room'] + " room."}, room=data['room'])
+    send({'msg': data['username'] + " has left the " + data['display_name'] + " room."}, room=data['room'])
     
     
 @socketio.on('cardDragStart')
@@ -420,12 +424,23 @@ def createDirectMessagingRoom(json):
     project_id = json['project_id']
     user = User.query.filter_by(username = json['username']).first_or_404()
     other_user = User.query.filter_by(id = json['otheruser_id']).first_or_404()
-    room_title = str(user.id)+":"+user.username+":"+str(other_user.id)+":"+other_user.username
-    users = str(user.id)+":"+str(other_user.id)
-    username_list = user.username +":"+ other_user.username
-    new_room = Channel(project_id=project_id,room=room_title,users = users)
-    db.session.add(new_room)
-    db.session.commit()
+    if(user.id < other_user.id):
+        room_title = str(user.id)+":"+user.username+":"+str(other_user.id)+":"+other_user.username
+        users = str(user.id)+":"+str(other_user.id)
+        username_list = user.username +":"+ other_user.username
+        new_room = Channel(project_id=project_id,room=room_title,users = users)
+        db.session.add(new_room)
+        db.session.commit()
+    
+    else:
+        room_title = str(other_user.id)+":"+other_user.username+":"+str(user.id)+":"+user.username
+        users = str(other_user.id)+":"+str(user.id)
+        username_list = user.username +":"+ other_user.username
+        new_room = Channel(project_id=project_id,room=room_title,users = users)
+        db.session.add(new_room)
+        db.session.commit()
+    
+    
     emit('displayNewDMRoom',{'project_id':project_id, 'username_list':username_list,'room_id':room_title},broadcast=True)
 
 
@@ -434,14 +449,23 @@ def createGroupMessagingRoom(json):
     project_id = json['project_id']
     room_title = json['roomName']
     user = User.query.filter_by(username = json['username']).first_or_404()
-    user_list = str(user.id)
     username_list = user.username
-    for user in json['users']:
-        user_list += ":"+user
-        user = User.query.filter_by(username = json['username']).first_or_404()
+    user_list = ""
+    tosort = [user.id]
+    for x in json['users']:
+        tosort.append(int(x))
+    print(tosort)
+    mylist = sorted(tosort)
+    print(mylist)
+    for user in mylist:
+        user_list += ":"+str(user)
+        user = User.query.filter_by(id = user).first_or_404()
         username_list += ":"+user.username
-    new_room = Channel(project_id=project_id,room=room_title,users = user_list)
-    db.session.add(new_room)
-    db.session.commit()
+        print(username_list)
+    duplicate = db.session.query(Channel).filter_by(room = room_title,users = user_list).first()
+    if duplicate == None:
+        new_room = Channel(project_id=project_id,room=room_title,users = user_list)
+        db.session.add(new_room)
+        db.session.commit()
+        emit('displayNewGroupRoom',{'project_id':project_id,'room_title':room_title,'username_list':username_list},broadcast=True)
     
-    emit('displayNewGroupRoom',{'project_id':project_id,'room_title':room_title,'username_list':username_list},broadcast=True)

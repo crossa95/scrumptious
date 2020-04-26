@@ -1,29 +1,30 @@
 var socket = io();
 let room = document.querySelector("#sidebar > p:nth-child(2)").innerHTML;
-username = document.querySelector('#get-username').innerHTML;
-project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+const username = document.querySelector('#get-username').innerHTML;
+const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
 document.addEventListener('DOMContentLoaded', () => {    
     joinRoom(room);
     // Displays incoming messages
     socket.on('message', data => {
+        
         const p = document.createElement('p');
         const span_username = document.createElement('span');
         const span_timestamp = document.createElement('span');
         const br = document.createElement('br');
-
+        
         if (data.username == username){
             p.setAttribute("class", "my-msg");
 
             //username
             span_username.setAttribute("class", "my-username")
-            span_username.innerText = data.username;
+            span_username.innerText = data['username'];
 
             //timestamp
             span_timestamp.setAttribute("class", "timestamp")
-            span_timestamp.innerText = data.time_stamp;
+            span_timestamp.innerText = data['time_stamp'];
 
             // HTML to append
-            p.innerHTML += span_username.outerHTML + br.outerHTML + data.msg + br.outerHTML + span_timestamp.outerHTML;
+            p.innerHTML += span_username.outerHTML + br.outerHTML + data['msg'] + br.outerHTML + span_timestamp.outerHTML;
             document.querySelector('#display-message-section').append(p);
         }
          // Display other users' messages
@@ -32,11 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Username
             span_username.setAttribute("class", "other-username");
-            span_username.innerText = data.username;
+            span_username.innerText = data['username'];
 
             // Timestamp
             span_timestamp.setAttribute("class", "timestamp");
-            span_timestamp.innerText = data.time_stamp;
+            span_timestamp.innerText = data['time_stamp'];
 
             // HTML to append
             p.innerHTML += span_username.outerHTML + br.outerHTML + data.msg + br.outerHTML + span_timestamp.outerHTML;
@@ -48,61 +49,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         else {
-            printSysMsg(data.msg);
+            printSysMsg(data['msg']);
         }
 
     });
 
     // Send message
     document.querySelector('#send_message').onclick = () => {
-        rooms = document.querySelectorAll('.select-room').forEach(p =>{
-            if (p.innerHTML == room){
-                if (p.hasAttribute("room_id")){
-                    socket.send({'msg': document.querySelector('#user_message').value,
-                    'username': username, 'room': p.getAttribute("room_id"), 'room_displayed':room, project_id:project_id});
-                }
-                else{
-                    socket.send({'msg': document.querySelector('#user_message').value,
-                    'username': username, 'room': room ,'room_displayed':room, project_id:project_id});
-                }
-            }
-        })
+       
+        socket.send({'msg': document.querySelector('#user_message').value,
+                    'username': username, 'room': room, 'room_displayed':room, project_id:project_id});
+        
         // Clear input area
         document.querySelector('#user_message').value = '';
     }
-
-    document.querySelectorAll('.select-room').forEach(p => {
-        p.onclick = () => {
-            let newRoom = p.innerHTML;
-            if (newRoom == room) {
-                msg = `You are already in this room.`
-                printSysMsg(msg);
-            } else {
-                leaveRoom(room);
-                joinRoom(newRoom);
-                room = newRoom;
-            }
-        }
-    });
+    navBarSetUp();
+    
 })
 
 // Leave room
 function leaveRoom(room) {
-    socket.emit('leave', {'username': username, 'room': room});
+    rooms = document.querySelectorAll('.select-room').forEach(p =>{
+        if (p.innerHTML == room){
+            if (p.hasAttribute("room_id")){
+                socket.emit('leave', {'username': username, 'room': p.getAttribute("room_id"),'display_name':p.innerHTML , project_id:project_id})
+            }
+            else{
+                socket.emit('leave', {'username': username, 'room': room , 'display_name':room,project_id:project_id})
+            }
+        }
+    })
 }
 
 // Join room
 function joinRoom(room) {
-    rooms = document.querySelectorAll('.select-room').forEach(p =>{
-        if (p.innerHTML == room){
-            if (p.hasAttribute("room_id")){
-                socket.emit('join', {'username': username, 'room': p.innerHTML,'display_name':p.getAttribute("room_id") , project_id:project_id})
-            }
-            else{
-                socket.emit('join', {'username': username, 'room': room , 'display_name':room,project_id:project_id})
-            }
-        }
-    })
+    socket.emit('join', {'username': username, 'room': room, project_id:project_id})
+    
     
     // Clear message area
     document.querySelector('#display-message-section').innerHTML = ''
@@ -378,7 +360,7 @@ function closeForm() {
    * Actions For Each ContextMenu Option
    */
 function menuItemListener( link ) {
-    project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     username = document.querySelector('#get-username').innerHTML;
     if (link.getAttribute('data-action') == 'Edit'){
         card_id = CardInContext.id;
@@ -576,7 +558,7 @@ function getMembers(){
 }
 
 socket.on('buildNewChannel', json=>{
-    project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     if (json['project_id'] == project_id){
         popup = document.querySelector("#members-options > ul");
         newUser = document.createElement("div");
@@ -647,6 +629,8 @@ socket.on('displayNewGroupRoom', json=> {
     const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
 
     var arrayUsers = json['username_list'].split(":");
+    console.log(arrayUsers)
+    console.log(arrayUsers.includes(username))
     if (arrayUsers.includes(username) && project_id == json['project_id']){
         sidebar = document.querySelector("#sidebar");
 
@@ -654,54 +638,78 @@ socket.on('displayNewGroupRoom', json=> {
         newChannel.className = "select-room";
         newChannel.innerHTML = json['room_title'];
 
-        sidebar.insertBefore(newChannel,document.querySelector("#sidebar > button"));
-
-        newChannel.onclick = () => {
-            let newRoom = newChannel.innerHTML;
-            if (newRoom == room) {
-                msg = `You are already in ${room} room.`
-                printSysMsg(msg);
-            } else {
-                leaveRoom(room);
-                joinRoom(newRoom);
-                room = newRoom;
+        eles = document.querySelectorAll("#sidebar > p");
+            duplicate = false;
+            for (let i = 0; i<eles.length; i++){
+                if (eles[i].innerHTML == json['room_title']){
+                    duplicate = true;
+                }
             }
-        }
+        if(!duplicate){sidebar.insertBefore(newChannel,document.querySelector("#sidebar > button"));}
+        navBarSetUp();
     }
 })
 
 
 socket.on('displayNewDMRoom', json=> {
-    const username = document.querySelector('#get-username').innerHTML;
+    //const username = document.querySelector('#get-username').innerHTML;
     const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     usernames = json['username_list'].split(":");
-    if (usernames[0] == username){
-        room_title = usernames[1];
-    }else{
-        room_title = usernames[0];
+    if(usernames.includes(username)){
+        if (usernames[0] == username){
+            room_title = usernames[1];
+        }else{
+            room_title = usernames[0];
+        }
+        if (project_id == json['project_id']){
+            sidebar = document.querySelector("#sidebar");
+
+            newChannel = document.createElement("p");
+            newChannel.className = "select-room";
+            newChannel.setAttribute("room_id",json['room_id']);
+            newChannel.innerHTML = room_title;
+            eles = document.querySelectorAll("#sidebar > p");
+            duplicate = false;
+            for (let i = 0; i<eles.length; i++){
+                if (eles[i].getAttribute("room_id") == json['room_id']){
+                    duplicate = true;
+                }
+            }
+            if(!duplicate){sidebar.insertBefore(newChannel,document.querySelector("#sidebar > button"));}
+            navBarSetUp();
+        }
     }
-    if (project_id == json['project_id']){
-        sidebar = document.querySelector("#sidebar");
 
-        newChannel = document.createElement("p");
-        newChannel.className = "select-room";
-        newChannel.setAttribute("room_id",json['room_id']);
-        newChannel.innerHTML = room_title;
-
-        sidebar.insertBefore(newChannel,document.querySelector("#sidebar > button"));
-
-        newChannel.onclick = () => {
-            let newRoom = room_title;
-            if (newRoom == room) {
+})
+function navBarSetUp(){
+    document.querySelectorAll('.select-room').forEach(p => {
+        p.onclick = () => {
+            if (p.hasAttribute("room_id")){
+                let newRoom = p.getAttribute("room_id");
+                if (newRoom == room) {
                 msg = `You are already in this room.`
                 printSysMsg(msg);
-            } else {
+                } else {
+                    console.log("i made it")
                 leaveRoom(room);
                 joinRoom(newRoom);
                 room = newRoom;
+                }
             }
+            else{let newRoom = p.innerHTML;
+                if (newRoom == room) {
+                    msg = `You are already in this room.`
+                    printSysMsg(msg);
+                } else {
+                    leaveRoom(room);
+                    joinRoom(newRoom);
+                    room = newRoom;
+                }
+            }    
         }
-    }
-})
+    });
+}
+    
+
 
 init();
