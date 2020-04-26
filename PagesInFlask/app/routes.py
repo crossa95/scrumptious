@@ -8,10 +8,11 @@ from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
 from app import app, db, bcrypt, socketio
 from app.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, ProjectForm, UpdateProjectForm, CardForm, InviteForm
-from app.models import User, Project, Card, Chat_History, Sprint, subs
+from app.models import User, Project, Card, Chat_History, Sprint, subs,Channel
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_socketio import send, emit, join_room, leave_room
 from datetime import datetime
+from sqlalchemy import inspect
 import json
 # Pre-defined chat rooms
 ROOMS = ["general", "design", "prototype", "problems"]
@@ -254,9 +255,13 @@ def invite(project_id, username):
     if form.validate_on_submit():
         user_email = form.email.data
         user = User.query.filter_by(email=user_email).first_or_404()
-        project.users_in.append(user)
-        db.session.commit()
-        flash(user_email + ' has successfully been added.', 'success')
+        subss = db.session.query(subs).filter_by(project_id=project_id, user_id= user.id).all()
+        if len(subss) == 0:
+            project.users_in.append(user)
+            db.session.commit()
+            flash(user_email + ' has successfully been added.', 'success')
+        else:
+            flash(user_email + ' is already in this project', 'success')
         return redirect(url_for('project',project_id=project.id, username=current_user.username))
     return render_template('invite.html', title='Invite a Member', form=form, legend = 'Invite a Member')
 
@@ -268,7 +273,7 @@ def message(data):
     message = Chat_History(message=data['msg'],username = data['username'],room =data['room'], project_id = data['project_id'])
     db.session.add(message)
     db.session.commit()
-    send({'msg': data['msg'], 'username': data['username'], 'time_stamp': strftime('%b-%d %I:%M%p', localtime())}, room=data['room'])
+    send({'msg': data['msg'], 'username': data['username'], 'time_stamp': strftime('%b-%d %I:%M%p', localtime())}, room=data['room_displayed'])
 
 def myconverter(time):
     time = datetime.strftime(time,'%b-%d %I:%M%p')
@@ -281,8 +286,8 @@ def join(data):
     for msg in messages:
         time = json.dumps(msg.time_stamp, default = myconverter)
         time = time.strip('"')
-        send({'msg': msg.message, 'username':msg.username, 'time_stamp': time,'room':data['room']})
-    send({'msg': data['username'] + " has joined the " + data['room'] + " room."}, room=data['room'])
+        send({'msg': msg.message, 'username':msg.username, 'time_stamp': time,'room':data['display_name']})
+    send({'msg': data['username'] + " has joined the room."}, room=data['room'])
 
 @socketio.on('leave')
 def leave(data):
@@ -373,7 +378,7 @@ def cardInfo(json):
     card = db.session.query(Card).filter_by(id=json['card_id']).first_or_404()
     info = [card.title,card.description]
     emit('cardInfo',{'title':card.title,'description':card.description,'card_id':json['card_id']})
-
+ 
 @socketio.on('sprintDelete')
 def sprintDelete(json):
     sprints = db.session.query(Sprint).filter_by(project_id=json['project_id']).all()
@@ -400,3 +405,43 @@ def sprintDelete(json):
             spr.sprint_num = spr.sprint_num -1
             db.session.commit()
             emit('sprintDecrement',{'project_id':json['project_id'],'id':sprintID,'new_id':newsprintID},broadcast = True)
+
+@socketio.on('getMembers')
+def getMembers(json):
+    user = User.query.filter_by(username = json['username']).first_or_404()
+    subss  = db.session.query(subs).all()
+    for sub in subss:
+        user = User.query.filter_by(id = sub[0]).first_or_404()
+        if (sub[1] == json['project_id'] and user.username != json['username']):
+            emit('buildNewChannel',{'project_id':json['project_id'],'user_id':user.id,'username': user.username,'image_file':user.image_file})
+        
+@socketio.on('createDirectMessagingRoom')
+def createDirectMessagingRoom(json):
+    project_id = json['project_id']
+    user = User.query.filter_by(username = json['username']).first_or_404()
+    other_user = User.query.filter_by(id = json['otheruser_id']).first_or_404()
+    room_title = str(user.id)+":"+user.username+":"+str(other_user.id)+":"+other_user.username
+    users = str(user.id)+":"+str(other_user.id)
+    username_list = user.username +":"+ other_user.username
+    new_room = Channel(project_id=project_id,room=room_title,users = users)
+    db.session.add(new_room)
+    db.session.commit()
+    emit('displayNewDMRoom',{'project_id':project_id, 'username_list':username_list,'room_id':room_title},broadcast=True)
+
+
+@socketio.on('createGroupMessagingRoom')
+def createGroupMessagingRoom(json):
+    project_id = json['project_id']
+    room_title = json['roomName']
+    user = User.query.filter_by(username = json['username']).first_or_404()
+    user_list = str(user.id)
+    username_list = user.username
+    for user in json['users']:
+        user_list += ":"+user
+        user = User.query.filter_by(username = json['username']).first_or_404()
+        username_list += ":"+user.username
+    new_room = Channel(project_id=project_id,room=room_title,users = user_list)
+    db.session.add(new_room)
+    db.session.commit()
+    
+    emit('displayNewGroupRoom',{'project_id':project_id,'room_title':room_title,'username_list':username_list},broadcast=True)

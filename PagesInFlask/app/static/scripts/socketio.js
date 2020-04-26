@@ -1,13 +1,9 @@
 var socket = io();
+let room = document.querySelector("#sidebar > p:nth-child(2)").innerHTML;
+username = document.querySelector('#get-username').innerHTML;
+project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
 document.addEventListener('DOMContentLoaded', () => {    
-
-    // retrive username
-    const username = document.querySelector('#get-username').innerHTML;
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
-    //set default room
-    let room = document.querySelector("#sidebar > p:nth-child(2)").innerHTML;
     joinRoom(room);
-
     // Displays incoming messages
     socket.on('message', data => {
         const p = document.createElement('p');
@@ -59,9 +55,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Send message
     document.querySelector('#send_message').onclick = () => {
-        socket.send({'msg': document.querySelector('#user_message').value,
-            'username': username, 'room': room , project_id:project_id});
-
+        rooms = document.querySelectorAll('.select-room').forEach(p =>{
+            if (p.innerHTML == room){
+                if (p.hasAttribute("room_id")){
+                    socket.send({'msg': document.querySelector('#user_message').value,
+                    'username': username, 'room': p.getAttribute("room_id"), 'room_displayed':room, project_id:project_id});
+                }
+                else{
+                    socket.send({'msg': document.querySelector('#user_message').value,
+                    'username': username, 'room': room ,'room_displayed':room, project_id:project_id});
+                }
+            }
+        })
         // Clear input area
         document.querySelector('#user_message').value = '';
     }
@@ -70,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         p.onclick = () => {
             let newRoom = p.innerHTML;
             if (newRoom == room) {
-                msg = `You are already in ${room} room.`
+                msg = `You are already in this room.`
                 printSysMsg(msg);
             } else {
                 leaveRoom(room);
@@ -79,38 +84,38 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
-    // Leave room
-    function leaveRoom(room) {
-        socket.emit('leave', {'username': username, 'room': room});
-    }
-
-    // Join room
-    function joinRoom(room) {
-        socket.emit('join', {'username': username, 'room': room , project_id:project_id})
-
-        // Clear message area
-        document.querySelector('#display-message-section').innerHTML = ''
-
-        //autofocus on textbox
-        document.querySelector('#user_message').focus()
-
-
-    }
-
-    // Print System Message
-
-    function printSysMsg(msg) {
-        const p = document.createElement('p');
-        p.innerHTML = msg;
-        document.querySelector('#display-message-section').append(p);
-    }
-
-    /* socket.on('cardDragStart', data => {
-        id = data;        
-    }) */
-
 })
+
+// Leave room
+function leaveRoom(room) {
+    socket.emit('leave', {'username': username, 'room': room});
+}
+
+// Join room
+function joinRoom(room) {
+    rooms = document.querySelectorAll('.select-room').forEach(p =>{
+        if (p.innerHTML == room){
+            if (p.hasAttribute("room_id")){
+                socket.emit('join', {'username': username, 'room': p.innerHTML,'display_name':p.getAttribute("room_id") , project_id:project_id})
+            }
+            else{
+                socket.emit('join', {'username': username, 'room': room , 'display_name':room,project_id:project_id})
+            }
+        }
+    })
+    
+    // Clear message area
+    document.querySelector('#display-message-section').innerHTML = ''
+    //autofocus on textbox
+    document.querySelector('#user_message').focus()
+}
+
+// Print System Message
+function printSysMsg(msg) {
+    const p = document.createElement('p');
+    p.innerHTML = msg;
+    document.querySelector('#display-message-section').append(p);
+}
 
 socket.on('cardDragging', data  => {      
     var element = document.getElementById(data);
@@ -441,18 +446,19 @@ function clickInsideElement( e, className ) {
     return false;
 }
 
-  var contextMenuLinkClassName = "context-menu__link";
-  var contextMenuActive = "context-menu--active";
+var contextMenuLinkClassName = "context-menu__link";
+var contextMenuActive = "context-menu--active";
 
-  var CardItemClassName = "list-item";
-  var CardInContext;
+var CardItemClassName = "list-item";
+var CardInContext;
 
-  var SprintItemClassName = "nav-link";
-  var SprintInContext;
+    
+var SprintItemClassName = "nav-link";
+var SprintInContext;
 
-  var menu = document.querySelector("#context-menu");
-  var menuItems = menu.querySelectorAll(".context-menu__item");
-  var menuState = 0;
+var menu = document.querySelector("#context-menu");
+var menuItems = menu.querySelectorAll(".context-menu__item");
+var menuState = 0;
 
 function init() {
     contextListener();
@@ -494,30 +500,32 @@ function contextListener() {
 
 function clickListener() {
     document.addEventListener( "click", function(e) {
-      var clickeElIsLink = clickInsideElement( e, contextMenuLinkClassName );
-
-      if ( clickeElIsLink ) {
-        e.preventDefault();
-        menuItemListener( clickeElIsLink );
-      } else {
-        var button = e.which || e.button;
-        if ( button === 1 ) {
-          toggleMenuOff();
-          toggleSprintPopMenuOff();
+        var clickeElIsLink = clickInsideElement( e, contextMenuLinkClassName );
+        var clickEIsPopUp = clickInsideElement(e,"card-popup");
+        var clickEIsChannelPop = clickInsideElement(e,"channel-popup");
+        var clickEIsAddChannel = clickInsideElement(e,"add-room");
+        if ( clickeElIsLink ) {
+            e.preventDefault();
+            menuItemListener( clickeElIsLink );
+        } 
+        else if (clickEIsPopUp){
+            // do nothing
         }
-      }
-      var clickEIsPopUp = clickInsideElement(e,"card-popup");
-      if (clickEIsPopUp){
-          // do nothing
-      }
-      else {
-        var button = e.which || e.button;
-        if ( button === 1 ) {
-          closeForm();
+        else if (clickEIsChannelPop){
+            // do nothing
         }
-    }
-        
-        
+        else if (clickEIsAddChannel && document.getElementById("channel-popup").style.display == "none"){
+           getMembers();
+        }
+        else {
+            var button = e.which || e.button;
+            if ( button === 1 ) {
+            toggleMenuOff();
+            toggleChannelPopUpOff();
+            toggleSprintPopMenuOff();
+            closeForm();
+            }
+        }
     });
 }
 
@@ -559,5 +567,141 @@ function toggleSprintPopMenuOn(){
 function toggleSprintPopMenuOff(){
     document.getElementById("sprint-pop").style.display = "none";
 }
+
+function getMembers(){
+    const username = document.querySelector('#get-username').innerHTML;
+    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    toggleChannelPopUpOn();
+    socket.emit('getMembers',{'username':username,'project_id':project_id})
+}
+
+socket.on('buildNewChannel', json=>{
+    project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    if (json['project_id'] == project_id){
+        popup = document.querySelector("#members-options > ul");
+        newUser = document.createElement("div");
+        newUser.className = "listofusers"
+
+        img = document.createElement("img");
+        img.className = "avatar";
+        img.setAttribute("src",'/static/profile_pics/'+json['image_file']);
+        img.setAttribute("alt","user_image");
+
+        checkbox = document.createElement('input');
+        checkbox.setAttribute("type","checkbox");
+        checkbox.setAttribute("id",json['user_id']);
+        checkbox.className = "checkNames";
+
+        newUser.appendChild(img);
+        newUser.append(json['username']);
+        newUser.appendChild(checkbox);
+        
+        popup.appendChild(newUser);
+    }
+})
+
+function toggleChannelPopUpOn(){
+    document.getElementById("channel-popup").style.display = "block";
+}
+
+function toggleChannelPopUpOff(){
+    document.getElementById("channel-popup").style.display = "none";
+    popup = document.querySelector("#members-options > ul").innerHTML = "";
+    document.querySelector("#channel-popup > input").value = "";
+}
+
+function makeChannel(){
+    const username = document.querySelector('#get-username').innerHTML;
+    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    name = document.querySelector("#channel-popup > input").value;
+    numusers = $('.checkNames:checkbox:checked').length+1;
+    console.log(numusers)
+    if (numusers == 1){
+        toggleChannelPopUpOff();
+    }
+    else if(numusers == 2){
+        checkedUserID = $('.checkNames:checkbox:checked')[0].id;
+        console.log(checkedUserID)
+        socket.emit('createDirectMessagingRoom',{'project_id':project_id,'username':username,'otheruser_id':parseInt(checkedUserID)})
+        toggleChannelPopUpOff();
+    }
+    else{
+        if (name.trim() == ""){
+            alert("Channel Name is required for Group Channels")
+        }
+        else{
+        users = []
+        checkedUsers = $('.checkNames:checkbox:checked').each(function(){
+            checkedUserID = this.id;
+            users.push(checkedUserID);
+        })
+        console.log(users)
+        socket.emit('createGroupMessagingRoom', {"project_id":project_id,'username':username,'users':users,'roomName':name})
+        toggleChannelPopUpOff();
+        }  
+    }
+}
+
+socket.on('displayNewGroupRoom', json=> {
+    const username = document.querySelector('#get-username').innerHTML;
+    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+
+    var arrayUsers = json['username_list'].split(":");
+    if (arrayUsers.includes(username) && project_id == json['project_id']){
+        sidebar = document.querySelector("#sidebar");
+
+        newChannel = document.createElement("p");
+        newChannel.className = "select-room";
+        newChannel.innerHTML = json['room_title'];
+
+        sidebar.insertBefore(newChannel,document.querySelector("#sidebar > button"));
+
+        newChannel.onclick = () => {
+            let newRoom = newChannel.innerHTML;
+            if (newRoom == room) {
+                msg = `You are already in ${room} room.`
+                printSysMsg(msg);
+            } else {
+                leaveRoom(room);
+                joinRoom(newRoom);
+                room = newRoom;
+            }
+        }
+    }
+})
+
+
+socket.on('displayNewDMRoom', json=> {
+    const username = document.querySelector('#get-username').innerHTML;
+    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    usernames = json['username_list'].split(":");
+    if (usernames[0] == username){
+        room_title = usernames[1];
+    }else{
+        room_title = usernames[0];
+    }
+    if (project_id == json['project_id']){
+        sidebar = document.querySelector("#sidebar");
+
+        newChannel = document.createElement("p");
+        newChannel.className = "select-room";
+        newChannel.setAttribute("room_id",json['room_id']);
+        newChannel.innerHTML = room_title;
+
+        sidebar.insertBefore(newChannel,document.querySelector("#sidebar > button"));
+
+        newChannel.onclick = () => {
+            let newRoom = room_title;
+            if (newRoom == room) {
+                msg = `You are already in this room.`
+                printSysMsg(msg);
+            } else {
+                leaveRoom(room);
+                joinRoom(newRoom);
+                room = newRoom;
+            }
+        }
+    }
+})
 
 init();

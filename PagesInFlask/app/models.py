@@ -2,6 +2,7 @@ from datetime import datetime
 from app import db, login_manager
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import inspect
 
 # Everytime you make a model, remember that you have to import it into other .py files like routes.py for example
 
@@ -16,6 +17,7 @@ def load_user(user_id):
 subs = db.Table('subs',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('project_id', db.Integer, db.ForeignKey('project.id'))
+
 )
 
 class User(db.Model, UserMixin):
@@ -75,8 +77,15 @@ class Sprint(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     sprint_num = db.Column(db.Integer, nullable=False, default =1)
-
+    
     def __repr__(self):
         return f"Msg('{self.sprint_num}')"
     
+class Channel(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
+    room = db.Column('room',db.String(20),nullable = False)
+    users = db.Column(db.String(50),default="")
+   
+
 db.create_all()
