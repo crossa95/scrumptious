@@ -361,7 +361,7 @@ function closeForm() {
    */
 function menuItemListener( link ) {
     //project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
-    username = document.querySelector('#get-username').innerHTML;
+    
     if (link.getAttribute('data-action') == 'Edit'){
         card_id = CardInContext.id;
         card_id = parseInt(card_id.replace("card_",""));
@@ -391,6 +391,7 @@ function menuItemListener( link ) {
         socket.emit('cardDelete', {'card_id':card_id});
     }
     else if(link.getAttribute('data-action') == 'Set Priority'){
+        console.log("here")
         card_id = CardInContext.id;
         card_id = parseInt(card_id.replace("card_",""));
         console.log(card_id)
