@@ -14,51 +14,62 @@
     <style>
     /* Make the image fully responsive */
     .carousel-inner img {
-        width: 100%;
-        height: 100%;
-        padding-top:7rem
+        width: 500px;
+        height: 300px;
     }
     </style>
   </head>
   <body>
-
-  <div id="demo" class="carousel slide" data-ride="carousel" >
-    <!-- Indicators -->
-    <ul class="carousel-indicators">
-      <li data-target="#demo" data-slide-to="0" class="active"></li>
-      <li data-target="#demo" data-slide-to="1"></li>
-
-    </ul>
-
-    <!-- The slideshow -->
-    <div class="carousel-inner">
-      <div class="carousel-item active">
-        <img class="center-block" src="{{url_for('static', filename='home_pics/meeting1.jpg')}}" alt="Meeting 1" width="1100" height="500" >
+    <div style="padding-top: 7em;">
+      <h1 align = "center"> 
+        <img src="{{url_for('static', filename='layout_pics/Logo1.2.2.png')}}" width="225" height="150">
+        WELCOME TO PMT 
+        <h4 align = "center"> <i>A Project Management Tool for Software Developers</i></h3>
+      </h1>
+      <hr>
+      <h3 style="margin-left:75px;">What is it?</h3>
+      <p style="margin-left:75px; margin-right:75px;">
+        PMT is a project management tool primarily for software developers. It incoporates the functionality
+        of a kanban board, which allows the user to organize their tasks as cards that can be moved to match specific
+        project deadlines (sprints), and a chat system for each specific project.
+      </p>
+      <br>
+      <div id="demo" class="carousel slide" data-ride="carousel" style="text-align: center;">
+        <!-- Indicators -->
+        <ul class="carousel-indicators">
+          <li data-target="#demo" data-slide-to="0" class="active"></li>
+          <li data-target="#demo" data-slide-to="1"></li>
+        </ul>
+        <!-- The slideshow -->
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img class="center-block" src="{{url_for('static', filename='home_pics/meeting1.jpg')}}" alt="Meeting 1" width="1100" height="900" >
+          </div>
+          <div class="carousel-item">
+            <img class="center-block"  src="{{url_for('static', filename='home_pics/meeting2.jpg')}}" alt="Meeting 2" width="1100" height="900">
+          </div>
+        </div>
+        <!-- Left and right controls -->
+        <a class="carousel-control-prev" href="#demo" data-slide="prev">
+          <span class="carousel-control-prev-icon"></span>
+        </a>
+        <a class="carousel-control-next" href="#demo" data-slide="next">
+          <span class="carousel-control-next-icon"></span>
+        </a>
       </div>
-      <div class="carousel-item">
-        <img class="center-block"  src="{{url_for('static', filename='home_pics/meeting2.jpg')}}" alt="Meeting 2" width="1100" height="500">
-      </div>
+      <br>
+      <h3 style="margin-left:75px;">Why use it?</h3>
+      <p style="margin-left:75px; margin-right:75px;">
+        PMT allows the user to organize their project tasks as cards that can be set to different priorities
+        and assigned to different team members. These cards are automatically created in a Backlog and can be dragged into
+        the necessary project sprints' In-Progress column. Once these tasks are completed, the user can move them into the sprint's 
+        Done column, allowing their team members to know that it has been completed.
+      </p>
+      <p style="margin-left:75px; margin-right:75px;">
+        PMT also allows the user to chat with their team members for each project. They can set up channels with specific titles; for example,
+        there is a default channel called Design, this is were conversations about the project design can be put in order to keep the chat
+        organized.
+      </p>
     </div>
-
-    <!-- Left and right controls -->
-    <a class="carousel-control-prev" href="#demo" data-slide="prev">
-      <span class="carousel-control-prev-icon"></span>
-    </a>
-    <a class="carousel-control-next" href="#demo" data-slide="next">
-      <span class="carousel-control-next-icon"></span>
-    </a>
-  </div>
-
-  <br></br>
-  <h1 align = "center"> PMT </h1>
-  <h4 align = "center"> <i>A Project Management Tool for Software Developers</i></h3>
-
-  <h3>What is it?</h3>
-  <p>The purpose of PMT is to give software developers a packaged workflow tool. PMT combines a chat system and a Kanban board function that allows for convenient communications between team members during Scrum Sprints. Similar to other websites, members will need an account and will require an invitation to join projects that they did not make themselves. 
-
-  </p>
-  <h3 >Why use it?</h3>
-  <p style="margin-bottom: 10vh;">Planning and managing your project with PMT will help your team hit deadlines, stay on focused, and make awesome products. By organizing and planning out Sprints, large projects feel small. Confusion becomes awareness. And work gets done!</p>
-
   </body>
 {% endblock content %}

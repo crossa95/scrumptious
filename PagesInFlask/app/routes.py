@@ -32,7 +32,7 @@ def about():
 def register():
     # Check if a valid user is logged in, if one is alreayd logged in, registration form shouldn't be able to be accessed
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('account'))
     form = RegistrationForm()
 
     # After it goes into register html and the user has put in their info, this code happens if everything is ok
@@ -56,7 +56,7 @@ def register():
 def login():
     # If logged in, should redirect to home instead
     if current_user.is_authenticated:
-        return redirect(url_for('home'))
+        return redirect(url_for('account'))
 
     #if not logged in, sees the login form
     form = LoginForm()
@@ -71,7 +71,7 @@ def login():
             # this is if someone accesses a page that they need to be logged in to access
             # it will redirect them to what they were initially wanting to go to after they log in
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('home'))
+            return redirect(next_page) if next_page else redirect(url_for('account'))
         else:
             flash('Login Unsuccessful. Please verify that email and password are spelled correctly.', 'danger')
     return render_template('login.html', title='Login', form=form)
