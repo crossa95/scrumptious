@@ -384,6 +384,10 @@ function menuItemListener( link ) {
         });
         
     }
+    else if (link.getAttribute('data-action') == 'Assign To'){
+        console.log('here')
+        getMembers();
+    }
     else if (link.getAttribute('data-action') == 'Delete'){
         card_id = CardInContext.id;
         card_id = parseInt(card_id.replace("card_",""));
@@ -558,29 +562,54 @@ function getMembers(){
     socket.emit('getMembers',{'username':username,'project_id':project_id})
 }
 
-socket.on('buildNewChannel', json=>{
+socket.on('buildUserList', json=>{
+    console.log("Im here")
     //project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     if (json['project_id'] == project_id){
-        popup = document.querySelector("#members-options > ul");
-        newUser = document.createElement("div");
-        newUser.className = "listofusers"
+        if (document.getElementsByClassName('container tab-pane active')[0].id == "chat"){
+            popup = document.querySelector("#members-options > ul");
+            newUser = document.createElement("div");
+            newUser.className = "listofusers"
 
-        img = document.createElement("img");
-        img.className = "avatar";
-        img.setAttribute("src",'/static/profile_pics/'+json['image_file']);
-        img.setAttribute("alt","user_image");
+            img = document.createElement("img");
+            img.className = "avatar";
+            img.setAttribute("src",'/static/profile_pics/'+json['image_file']);
+            img.setAttribute("alt","user_image");
 
-        checkbox = document.createElement('input');
-        checkbox.setAttribute("type","checkbox");
-        checkbox.setAttribute("id",json['user_id']);
-        checkbox.className = "checkNames";
+            checkbox = document.createElement('input');
+            checkbox.setAttribute("type","checkbox");
+            checkbox.setAttribute("id",json['user_id']);
+            checkbox.className = "checkNames";
 
-        newUser.appendChild(img);
-        newUser.append(json['username']);
-        newUser.appendChild(checkbox);
-        
-        popup.appendChild(newUser);
+            newUser.appendChild(img);
+            newUser.append(json['username']);
+            newUser.appendChild(checkbox);
+            
+            popup.appendChild(newUser);
+        }
+        else{
+            popup = document.querySelector("#members-options > ul");
+            newUser = document.createElement("div");
+            newUser.className = "listofusers"
+
+            img = document.createElement("img");
+            img.className = "avatar";
+            img.setAttribute("src",'/static/profile_pics/'+json['image_file']);
+            img.setAttribute("alt","user_image");
+
+            checkbox = document.createElement('input');
+            checkbox.setAttribute("type","checkbox");
+            checkbox.setAttribute("id",json['user_id']);
+            checkbox.className = "checkNames";
+
+            newUser.appendChild(img);
+            newUser.append(json['username']);
+            newUser.appendChild(checkbox);
+            
+            popup.appendChild(newUser);
+        }
     }
+        
 })
 
 function toggleChannelPopUpOn(){

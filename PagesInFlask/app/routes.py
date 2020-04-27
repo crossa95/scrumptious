@@ -244,6 +244,10 @@ def delete_project(project_id, username):
         db.session.delete(row)
     db.session.commit()
  
+    for row in db.session.query(Channel).filter(Channel.project_id == project_id):
+        db.session.delete(row)
+    db.session.commit()
+    
     subss = db.session.query(subs).filter_by(project_id=project_id)
     subss.delete(synchronize_session=False)
     db.session.commit()
@@ -444,7 +448,7 @@ def getMembers(json):
     for sub in subss:
         user = User.query.filter_by(id = sub[0]).first_or_404()
         if (sub[1] == json['project_id'] and user.username != json['username']):
-            emit('buildNewChannel',{'project_id':json['project_id'],'user_id':user.id,'username': user.username,'image_file':user.image_file})
+            emit('buildUserList',{'project_id':json['project_id'],'user_id':user.id,'username': user.username,'image_file':user.image_file})
         
 @socketio.on('createDirectMessagingRoom')
 def createDirectMessagingRoom(json):
