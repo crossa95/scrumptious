@@ -262,6 +262,21 @@ body {
   overflow-wrap: break-word;
 }
 
+.list-item[assigned = 'on'] {
+  font-weight: bold;
+  font-size: larger;
+  text-shadow: -1px 0px 0 #000,0px 0px 0 #000,0px 0px 0 #000,0px 0px 0 #000;
+  text-decoration: dashed underline black;
+  text-decoration-color: black;
+  text-underline-position: under;
+  background-color: palegoldenrod;
+  letter-spacing: 1px;
+  box-shadow: -3px -3px 40px -10px currentColor;
+}
+
+.list-item[assigned = 'unassigned'] {
+  background-color: gainsboro;
+}
 .card {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2); /* this adds the "card" effect */
   text-align: center;
@@ -498,6 +513,7 @@ input[type=text]:focus{
   border: solid 1px #dfdfdf;
   box-shadow: 1px 1px 2px #cfcfcf;
   box-sizing: border-box;
+  border-radius: 1vh;
 
 }
 
@@ -634,4 +650,36 @@ input[type=text]:focus{
 }
 .channel-popup::-webkit-scrollbar { 
   display: none; 
+}
+
+.channel-popup #members-options ul{
+  padding-inline-start:0px;
+}
+
+.assign-popup {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  display: none;
+  position: fixed;
+  right: 4vw;
+  top: 25vh;
+  border: 3px solid #f1f1f1;
+  z-index: 14;
+  width: 175px;
+  max-height:50vh;
+  overflow:auto;
+  padding: 10px;
+  background-color: white;
+  border-radius: 1vw;
+  font-weight: bold;
+  margin-top: 15px;
+
+}
+.assign-popup::-webkit-scrollbar { 
+  display: none; 
+}
+
+.assign-popup #members-check ul{
+  padding-inline-start:0px;
 }

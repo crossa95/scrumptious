@@ -247,7 +247,7 @@ def delete_project(project_id, username):
     for row in db.session.query(Channel).filter(Channel.project_id == project_id):
         db.session.delete(row)
     db.session.commit()
-    
+
     subss = db.session.query(subs).filter_by(project_id=project_id)
     subss.delete(synchronize_session=False)
     db.session.commit()
@@ -414,6 +414,13 @@ def cardInfo(json):
     info = [card.title,card.description]
     emit('cardInfo',{'title':card.title,'description':card.description,'card_id':json['card_id']})
  
+@socketio.on('cardAssigned')
+def cardAssignments(json):
+    card = db.session.query(Card).filter_by(id=json['card_id']).first_or_404()
+    info = card.assigned
+    print(info)
+    emit('cardAssigned',{'assigned':info,'card_id':json['card_id']})
+
 @socketio.on('sprintDelete')
 def sprintDelete(json):
     sprints = db.session.query(Sprint).filter_by(project_id=json['project_id']).all()
@@ -449,7 +456,17 @@ def getMembers(json):
         user = User.query.filter_by(id = sub[0]).first_or_404()
         if (sub[1] == json['project_id'] and user.username != json['username']):
             emit('buildUserList',{'project_id':json['project_id'],'user_id':user.id,'username': user.username,'image_file':user.image_file})
-        
+
+@socketio.on('getAllMembers')
+def getAllMembers(json):
+    user = User.query.filter_by(username = json['username']).first_or_404()
+    subss  = db.session.query(subs).all()
+    for sub in subss:
+        user = User.query.filter_by(id = sub[0]).first_or_404()
+        if (sub[1] == json['project_id']):
+            emit('buildUserListAll',{'project_id':json['project_id'],'user_id':user.id,'username': user.username,'image_file':user.image_file})
+    emit('getAllMembersDone',{'project_id':json['project_id']})    
+
 @socketio.on('createDirectMessagingRoom')
 def createDirectMessagingRoom(json):
     project_id = json['project_id']
@@ -503,4 +520,62 @@ def createGroupMessagingRoom(json):
         db.session.add(new_room)
         db.session.commit()
         emit('displayNewGroupRoom',{'project_id':project_id,'room_title':room_title,'username_list':username_list},broadcast=True)
+    
+@socketio.on('assignChecks')
+def assignChecks(json):
+    card = db.session.query(Card).filter_by(id=json['card_id']).first_or_404()
+    project_id = card.project_id
+    new_string = ""
+    old_list = card.assigned
+    old_list = old_list.split(":")
+    old_list = sorted(old_list)
+    new_list = []
+    assignment_list = json['checkedUsers']
+    for x in assignment_list:
+        int(x)
+        user = db.session.query(User).filter_by(id= x).first_or_404()
+        new_list.append(user.username)
+        new_string += user.username +":"
+    print(new_list)
+    print(old_list)
+    print(len(new_list))
+    print(len(old_list))
+    print(new_string)
+    card_assigned = False
+    if (len(new_list) == 0):
+        emit('setAssignmentUnassigned',{'card_id':json['card_id']},broadcast=True)
+    
+    print("here")
+    if  (len(old_list) == 1 and len(new_list) > 0):
+        emit('setAssignmentOff',{'card_id':json['card_id']},broadcast=True)
+    
+    if (len(new_list)>0):
+        card_assigned = True    
+    print("here1")
+    for x in new_list:
+        if x not in old_list:
+            emit('setAssignmentOn',{'username':x,'card_id':json['card_id']}, broadcast= True)
+    
+    print("here2")
+    for y in old_list:
+        print(y)
+        print(y not in new_list)
+        print(y != "")
+        print(card_assigned)
+        if y not in new_list and y != "" and card_assigned:
+            emit('setUserAssignmentOff',{'username':y,'card_id':json['card_id']}, broadcast = True)
+    card.assigned = new_string
+    db.session.commit() 
+
+@socketio.on('allAssignments')
+def allAssignments(json):
+    cards = db.session.query(Card).filter_by(project_id = json['project_id']).all()
+    for card in cards:
+        users_assigned = card.assigned
+        users_assigned = users_assigned.split(":")
+        if (len(users_assigned) == 1):
+            emit('setAssignmentUnassigned',{'card_id':card.id})
+        for user in users_assigned:
+            emit('setAssignmentOn',{'username':user,'card_id':card.id})
+
     

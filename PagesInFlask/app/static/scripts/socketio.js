@@ -2,6 +2,7 @@ var socket = io();
 let room = document.querySelector("#sidebar > p:nth-child(2)").innerHTML;
 const username = document.querySelector('#get-username').innerHTML;
 const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+socket.emit('allAssignments',{'project_id':project_id});
 document.addEventListener('DOMContentLoaded', () => {    
     joinRoom(room);
     // Displays incoming messages
@@ -386,26 +387,42 @@ function menuItemListener( link ) {
     }
     else if (link.getAttribute('data-action') == 'Assign To'){
         console.log('here')
-        getMembers();
+        card_id = CardInContext.id;
+        toggleAssignPopUpOff();
+        toggleAssignPopUpOn();
+        document.getElementById("assign-popup").setAttribute("card",card_id);
+        card_id = parseInt(card_id.replace("card_",""));
+        getAllMembers();
+        socket.on('getAllMembersDone', json=>{
+            socket.emit('cardAssigned',{'card_id':card_id});
+            socket.on('cardAssigned', json=>{
+                users_assigned = json['assigned'];
+                if (users_assigned != ""){
+                    users_assigned = users_assigned.split(":");
+                    users_in = document.getElementsByClassName("listofusers");
+                    for (let i = 0; i< users_in.length; i++){
+                        if (users_assigned.includes(users_in[i].innerText)){
+                            users_in[i].children[1].checked = true;
+                        }
+                    }   
+                }
+            })
+        })        
     }
     else if (link.getAttribute('data-action') == 'Delete'){
         card_id = CardInContext.id;
         card_id = parseInt(card_id.replace("card_",""));
-        console.log(card_id)
         socket.emit('cardDelete', {'card_id':card_id});
     }
     else if(link.getAttribute('data-action') == 'Set Priority'){
-        console.log("here")
         card_id = CardInContext.id;
         card_id = parseInt(card_id.replace("card_",""));
-        console.log(card_id)
         socket.emit('cardPriority', {'card_id':card_id});
     }
     else if(link.getAttribute('data-action')=='Delete Sprint'){
         sprintNum = SprintInContext.innerText.replace("Sprint ","");
         numSprints = $(".nav-tabs").children().length - 1;
         if (numSprints != 1){
-            console.log("emitted sprintDelete")
             const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
             socket.emit('sprintDelete',{'project_id':project_id,'numSprints':numSprints,'sprintNum':sprintNum})
         }
@@ -452,6 +469,7 @@ function init() {
     clickListener();
     keyupListener();
     resizeListener();
+    
 }
 
   /**
@@ -491,6 +509,7 @@ function clickListener() {
         var clickEIsPopUp = clickInsideElement(e,"card-popup");
         var clickEIsChannelPop = clickInsideElement(e,"channel-popup");
         var clickEIsAddChannel = clickInsideElement(e,"add-room");
+        var clickEIsAssignMenu = clickInsideElement(e,"assign-popup");
         if ( clickeElIsLink ) {
             e.preventDefault();
             menuItemListener( clickeElIsLink );
@@ -504,10 +523,14 @@ function clickListener() {
         else if (clickEIsAddChannel && document.getElementById("channel-popup").style.display == "none"){
            getMembers();
         }
+        else if (clickEIsAssignMenu){
+            // do nothing
+        }
         else {
             var button = e.which || e.button;
             if ( button === 1 ) {
             toggleMenuOff();
+            toggleAssignPopUpOff();
             toggleChannelPopUpOff();
             toggleSprintPopMenuOff();
             closeForm();
@@ -555,6 +578,25 @@ function toggleSprintPopMenuOff(){
     document.getElementById("sprint-pop").style.display = "none";
 }
 
+function toggleAssignPopUpOn(){
+    document.getElementById("assign-popup").style.display = "block";
+}
+
+function toggleAssignPopUpOff(){
+    document.getElementById("assign-popup").style.display = "none";
+    popup = document.querySelector("#members-check > ul").innerHTML = "";
+}
+
+function getAllMembers(){
+    const username = document.querySelector('#get-username').innerHTML;
+    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    if (document.getElementById("assign-popup").style.display == "block"){
+        toggleAssignPopUpOff();
+    }
+    toggleAssignPopUpOn();
+    socket.emit('getAllMembers',{'username':username,'project_id':project_id})
+}
+
 function getMembers(){
     const username = document.querySelector('#get-username').innerHTML;
     const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
@@ -563,7 +605,6 @@ function getMembers(){
 }
 
 socket.on('buildUserList', json=>{
-    console.log("Im here")
     //project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     if (json['project_id'] == project_id){
         if (document.getElementsByClassName('container tab-pane active')[0].id == "chat"){
@@ -588,7 +629,58 @@ socket.on('buildUserList', json=>{
             popup.appendChild(newUser);
         }
         else{
+            //console.log("Im here")
+            popup = document.getElementById("members-check").children[0];
+            newUser = document.createElement("div");
+            newUser.className = "listofusers"
+
+            img = document.createElement("img");
+            img.className = "avatar";
+            img.setAttribute("src",'/static/profile_pics/'+json['image_file']);
+            img.setAttribute("alt","user_image");
+
+            checkbox = document.createElement('input');
+            checkbox.setAttribute("type","checkbox");
+            checkbox.setAttribute("id",json['user_id']);
+            checkbox.className = "checkNames";
+
+            newUser.appendChild(img);
+            newUser.append(json['username']);
+            newUser.appendChild(checkbox);
+            
+            popup.appendChild(newUser);
+        }
+    }
+        
+})
+
+socket.on('buildUserListAll', json=>{
+    //project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    if (json['project_id'] == project_id){
+        if (document.getElementsByClassName('container tab-pane active')[0].id == "chat"){
             popup = document.querySelector("#members-options > ul");
+            newUser = document.createElement("div");
+            newUser.className = "listofusers"
+
+            img = document.createElement("img");
+            img.className = "avatar";
+            img.setAttribute("src",'/static/profile_pics/'+json['image_file']);
+            img.setAttribute("alt","user_image");
+
+            checkbox = document.createElement('input');
+            checkbox.setAttribute("type","checkbox");
+            checkbox.setAttribute("id",json['user_id']);
+            checkbox.className = "checkNames";
+
+            newUser.appendChild(img);
+            newUser.append(json['username']);
+            newUser.appendChild(checkbox);
+            
+            popup.appendChild(newUser);
+        }
+        else{
+            //console.log("Im here")
+            popup = document.getElementById("members-check").children[0];
             newUser = document.createElement("div");
             newUser.className = "listofusers"
 
@@ -784,6 +876,50 @@ socket.on('project_update', json => {
             }
         })
     } */
+})
+
+function assignChecks(){
+    card_id = document.getElementById("assign-popup").getAttribute("card");
+    card_id = parseInt(card_id.replace("card_",""));
+    users = []
+    checkedUsers = $('.checkNames:checkbox:checked').each(function(){
+        checkedUserID = this.id;
+        users.push(checkedUserID);
+    })
+    console.log(users)
+    console.log(card_id)
+    socket.emit('assignChecks',{'checkedUsers':users,'card_id':card_id})
+    toggleAssignPopUpOff();
+}
+
+socket.on('setAssignmentOn', json =>{
+    if(username == json['username']){
+        ele_id = "card_"+String(json['card_id']);
+        var element = document.getElementById(ele_id);
+        element.setAttribute("assigned","on");
+    }
+})
+
+socket.on('setAssignmentUnassigned', json =>{
+    ele_id = "card_"+String(json['card_id']);
+    var element = document.getElementById(ele_id);
+    element.setAttribute("assigned","unassigned");
+})
+
+socket.on('setAssignmentOff', json => {
+    console.log("here to turn off")
+    ele_id = "card_"+String(json['card_id']);
+    var element = document.getElementById(ele_id);
+    element.setAttribute("assigned","off");
+})
+
+socket.on('setUserAssignmentOff', json => {
+    if(json['username'] == username){
+        console.log("here to turn off")
+        ele_id = "card_"+String(json['card_id']);
+        var element = document.getElementById(ele_id);
+        element.setAttribute("assigned","off");
+    }
 })
 
 init();
