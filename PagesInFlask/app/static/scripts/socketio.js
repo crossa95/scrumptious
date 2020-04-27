@@ -742,7 +742,7 @@ socket.on('project_update', json => {
             document.querySelector("body > main > div > div > div:nth-child(3) > p").childNodes[2].data = json['project_description'];
         }
     }
-    else if (document.URL.includes("myprojects") && !document.URL.includes("myprojects/project")){
+    /* else if (document.URL.includes("myprojects") && !document.URL.includes("myprojects/project")){
         $("a").each(function(){
             target = "project/"+String(json['project_id']);
             if (this.href.includes(target)){
@@ -754,7 +754,7 @@ socket.on('project_update', json => {
                 card.lastElementChild.children[2].innerText = json['project_description']
             }
         })
-    }
+    } */
 })
 
 init();

@@ -456,16 +456,20 @@ def createDirectMessagingRoom(json):
         users = str(user.id)+":"+str(other_user.id)
         username_list = user.username +":"+ other_user.username
         new_room = Channel(project_id=project_id,room=room_title,users = users)
-        db.session.add(new_room)
-        db.session.commit()
+        duplicate = db.session.query(Channel).filter_by(room = room_title,users = users).first()
+        if duplicate == None:
+            db.session.add(new_room)
+            db.session.commit()
     
     else:
         room_title = str(other_user.id)+":"+other_user.username+":"+str(user.id)+":"+user.username
         users = str(other_user.id)+":"+str(user.id)
         username_list = user.username +":"+ other_user.username
         new_room = Channel(project_id=project_id,room=room_title,users = users)
-        db.session.add(new_room)
-        db.session.commit()
+        duplicate = db.session.query(Channel).filter_by(room = room_title,users = users).first()
+        if duplicate == None:
+            db.session.add(new_room)
+            db.session.commit()
     
     
     emit('displayNewDMRoom',{'project_id':project_id, 'username_list':username_list,'room_id':room_title},broadcast=True)
