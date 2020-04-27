@@ -711,6 +711,27 @@ function navBarSetUp(){
     });
 }
     
+socket.on('listInvitedUser', json =>{
+    if (json['project_id'] == project_id && json['username'] != username && json['new_member_username'] != username){
+        new_username = json['new_member_username'];
+        new_photo = json['new_member_photo'];
 
+        memlist = document.querySelector("#members");
+        newUser = document.createElement("ul");
+        newListItem = document.createElement("li");
+
+        img = document.createElement("img");
+        img.className = "avatar";
+        img.setAttribute("src",'/static/profile_pics/'+new_photo);
+        img.setAttribute("alt","user_image");
+
+        newListItem.appendChild(img);
+        newListItem.append(" "+new_username);
+        newUser.appendChild(newListItem);
+        
+        memlist.insertBefore(newUser,document.querySelector("#members > a"));
+
+    }
+})
 
 init();

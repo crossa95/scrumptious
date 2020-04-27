@@ -260,6 +260,7 @@ def invite(project_id, username):
             project.users_in.append(user)
             db.session.commit()
             flash(user_email + ' has successfully been added.', 'success')
+            socketio.emit('listInvitedUser',{'project_id':project_id, 'username':username,'new_member_username':user.username,'new_member_photo':user.image_file},broadcast = True)
         else:
             flash(user_email + ' is already in this project', 'success')
         return redirect(url_for('project',project_id=project.id, username=current_user.username))
