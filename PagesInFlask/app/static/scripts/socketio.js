@@ -734,8 +734,27 @@ socket.on('listInvitedUser', json =>{
     }
 })
 
-socket.on('update_project', json => {
-    
+socket.on('project_update', json => {
+    console.log("here")
+    if(document.URL.includes("myprojects") && document.URL.includes("myprojects/project")){
+        if (json['project_id'] == project_id){
+            document.querySelector("body > main > div > div > h4").innerText = json['project_title'];
+            document.querySelector("body > main > div > div > div:nth-child(3) > p").childNodes[2].data = json['project_description'];
+        }
+    }
+    else if (document.URL.includes("myprojects") && !document.URL.includes("myprojects/project")){
+        $("a").each(function(){
+            target = "project/"+String(json['project_id']);
+            if (this.href.includes(target)){
+                card = this.parentElement.parentElement;
+                link = card.firstElementChild.src.subString(0,42);
+                link += json[project_image];
+                card.setAttribute("src", link);
+                card.lastElementChild.firstElementChild.innerText = json['project_title'];
+                card.lastElementChild.children[2].innerText = json['project_description']
+            }
+        })
+    }
 })
 
 init();
