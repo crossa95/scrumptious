@@ -148,7 +148,6 @@ def create_project(username):
     user = User.query.filter_by(username=username).first_or_404()
     form = ProjectForm()
     if form.validate_on_submit():
-        print(form.picture.data)
         if form.picture.data:
             print('here')
             picture_file = save_project_picture(form.picture.data)
@@ -216,11 +215,14 @@ def update_project(project_id, username):
     project = Project.query.get_or_404(project_id)
     form = UpdateProjectForm()
     if form.validate_on_submit():
+        if form.picture.data:
+            picture_file = save_project_picture(form.picture.data)
+            project.image_file = picture_file
         project.title = form.title.data
         project.description = form.description.data
         db.session.commit()
         flash('Your project has been successfully updated.', 'success')
-        socketio.emit('project_update',{'project_id':project_id,'project_title':project.title,'project_description':project.description},broadcast=True)
+        socketio.emit('project_update',{'project_id':project_id,'project_title':project.title,'project_description':project.description,'project_image':project.image_file},broadcast=True)
         return redirect(url_for('project',project_id=project.id, username=current_user.username))
     elif request.method == 'GET':
         form.title.data=project.title
