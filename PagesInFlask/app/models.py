@@ -47,7 +47,7 @@ class Project(db.Model):
     cards = db.relationship('Card', backref='author', lazy=True)
 
     def __repr__(self):
-        return f"Project('{self.title}', '{self.date_posted}')"
+        return f"Project('{self.title}', '{self.date_posted}','{self.image_file}')"
 
 class Card(db.Model):
     id = db.Column(db.Integer, primary_key=True)

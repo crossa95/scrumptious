@@ -734,4 +734,8 @@ socket.on('listInvitedUser', json =>{
     }
 })
 
+socket.on('update_project', json => {
+    
+})
+
 init();

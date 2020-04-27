@@ -71,7 +71,7 @@ class ProjectForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
     submit = SubmitField('Make New Project')
-    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
+    picture = FileField('Add Project Image', validators=[FileAllowed(['jpg', 'png'])])
 
 class UpdateProjectForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])

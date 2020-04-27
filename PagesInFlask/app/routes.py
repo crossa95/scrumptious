@@ -121,6 +121,22 @@ def account():
     return render_template('account.html', title='Account',
                            image_file=image_file, form=form)
 
+
+def save_project_picture(form_picture):
+
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, 'static/project_pics', picture_fn)
+
+    max_size = (900, 900)
+    i = Image.open(form_picture)
+    i.thumbnail(max_size)
+
+    i.save(picture_path)
+
+    return picture_fn
+
 # notice here that the route has variables in it, identified by <type:name> and passed into from the HTML. This is because my projects is specific to a user
 # By having it in the route, I can use it to query for the user and therefore I can get their projects
 # This is not terribly secure as theoretically the way I have it, anyone with this url can access it even if they are not the person
@@ -132,11 +148,18 @@ def create_project(username):
     user = User.query.filter_by(username=username).first_or_404()
     form = ProjectForm()
     if form.validate_on_submit():
+        print(form.picture.data)
         if form.picture.data:
-            picture_file = save_picture(form.picture.data)
-        project = Project(title=form.title.data, description=form.description.data, )
-        db.session.add(project)
-        db.session.commit()
+            print('here')
+            picture_file = save_project_picture(form.picture.data)
+            project = Project(title=form.title.data, description=form.description.data, image_file = picture_file)
+            db.session.add(project)
+            db.session.commit()
+        else:
+            print('here :(')
+            project = Project(title=form.title.data, description=form.description.data)
+            db.session.add(project)
+            db.session.commit()
 
         # I am using advantage of the fact that projects and usesrs are a many-to-many relationship
         # So here I have to the project creator as a user that is part of this particular project
@@ -197,6 +220,7 @@ def update_project(project_id, username):
         project.description = form.description.data
         db.session.commit()
         flash('Your project has been successfully updated.', 'success')
+        socketio.emit('project_update',{'project_id':project_id,'project_title':project.title,'project_description':project.description},broadcast=True)
         return redirect(url_for('project',project_id=project.id, username=current_user.username))
     elif request.method == 'GET':
         form.title.data=project.title
