@@ -588,6 +588,7 @@ def getChannels(json):
         
 @socketio.on('deleteChannel')
 def deleteChannel(json):
+    print(json['channelName'])
     channelName = json['channelName']
     channel = db.session.query(Channel).filter_by(room = channelName, project_id = json['project_id']).first()
     if channel != None:

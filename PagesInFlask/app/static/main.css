@@ -340,6 +340,10 @@ body {
   border-radius: 1vh;
 }
 
+#sidebar p[selected = True]{
+  border : 1px solid black;
+}
+
 #sidebar p:hover {
   cursor:pointer;
   background-color: #ffc107;

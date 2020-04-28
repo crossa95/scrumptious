@@ -81,14 +81,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Leave room
 function leaveRoom(room) {
+    channels=document.getElementsByClassName("select-room");
+    for(let i = 0; i<channels.length; i++){
+        if (channels[i].hasAttribute("room_id")){
+            if (channels[i].getAttribute("room_id") == room){
+                channels[i].setAttribute("selected", false);
+            }
+        }
+        else{
+            if (channels[i].innerHTML == room){
+                channels[i].setAttribute("selected", false);
+            }
+        }
+    }
     rooms = document.querySelectorAll('.select-room').forEach(p =>{
         if (p.innerHTML == room){
+            
             if (p.hasAttribute("room_id")){
                 socket.emit('leave', {'username': username, 'room': p.getAttribute("room_id"),'display_name':p.innerHTML , project_id:project_id})
             }
             else{
                 socket.emit('leave', {'username': username, 'room': room , 'display_name':room,project_id:project_id})
             }
+            
         }
     })
 }
@@ -97,7 +112,19 @@ function leaveRoom(room) {
 function joinRoom(room) {
     socket.emit('join', {'username': username, 'room': room, project_id:project_id})
     
-    
+    channels=document.getElementsByClassName("select-room");
+    for(let i = 0; i<channels.length; i++){
+        if (channels[i].hasAttribute("room_id")){
+            if (channels[i].getAttribute("room_id") == room){
+                channels[i].setAttribute("selected", true);
+            }
+        }
+        else{
+            if (channels[i].innerHTML == room){
+                channels[i].setAttribute("selected", true);
+            }
+        }
+    }
     // Clear message area
     document.querySelector('#display-message-section').innerHTML = ''
     //autofocus on textbox
@@ -1001,7 +1028,7 @@ socket.on('removeGroupChannelFromList', json => {
         channels = document.getElementsByClassName("select-room");
         for (let i = 0; i < channels.length; i++){
             if(channels[i].innerText == json['channelName']){
-                document.deleteElement(channels[i]);
+                channels[i].outerHTML = "";
                 room = "";
                 document.querySelector('#display-message-section').innerHTML = '';
             }
