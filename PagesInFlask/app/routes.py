@@ -567,18 +567,24 @@ def allAssignments(json):
 def getChannels(json):
     channels = db.session.query(Channel).filter_by(project_id = json['project_id']).all()
     user = db.session.query(User).filter_by(username = json['username']).first_or_404()
+    my_id = str(user.id)
+    print(user.username)
     for channel in channels:
+        print(channel.id)
         ids = channel.users.split(":")
+        print(ids)
         if(len(ids) > 2):
-            if(str(user.id) in ids):
+            print(str(user.id))
+            if(my_id in ids):
                 username_list = ""
                 for id in ids:
                     if id != "":
                         user = db.session.query(User).filter_by(id = id).first_or_404()
                         username_list += user.username+":"
+                print(username_list)
                 emit('displayNewGroupRoom',{'project_id':channel.project_id,'room_title':channel.room,'username_list':username_list})
         else:
-            if(str(user.id) in ids):
+            if(my_id in ids):
                 username_list = ""
                 for id in ids:
                     user = db.session.query(User).filter_by(id = id).first_or_404()
