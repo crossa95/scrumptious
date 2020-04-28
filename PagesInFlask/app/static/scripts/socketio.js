@@ -195,7 +195,7 @@ socket.on('cardPriority', json => {
 })
 
 socket.on('cardCreate', json => {
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     if (json['project_id'] == project_id){
         ele_id = "card_"+String(json["card_id"])
         element = document.createElement("div");
@@ -230,7 +230,7 @@ socket.on('cardCreate', json => {
 })
 
 socket.on('sprintCreate', json => {
-    project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     if (json['project_id'] == project_id){
         nav =  document.querySelector("#board > div > ul");
         newSprint = document.createElement("li");
@@ -338,7 +338,6 @@ socket.on('sprintCreate', json => {
     });
 
 socket.on('deleteSprint', json =>{
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     if(json['project_id'] == project_id){
         $( "a" ).each(function() {
             if(this.innerText == json['id']){
@@ -373,7 +372,7 @@ socket.on('deleteSprint', json =>{
 });
 
 socket.on('sprintDecrement', json =>{
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     console.log(json["id"])
     console.log(json['new_id'])
     if(json['project_id'] == project_id){
@@ -466,7 +465,7 @@ function menuItemListener( link ) {
         sprintNum = SprintInContext.innerText.replace("Sprint ","");
         numSprints = $(".nav-tabs").children().length - 1;
         if (numSprints != 1){
-            const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+            //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
             socket.emit('sprintDelete',{'project_id':project_id,'numSprints':numSprints,'sprintNum':sprintNum})
         }
     }
@@ -665,8 +664,8 @@ function toggleAssignPopUpOff(){
 }
 
 function getAllMembers(){
-    const username = document.querySelector('#get-username').innerHTML;
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //const username = document.querySelector('#get-username').innerHTML;
+    //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     if (document.getElementById("assign-popup").style.display == "block"){
         toggleAssignPopUpOff();
     }
@@ -675,8 +674,8 @@ function getAllMembers(){
 }
 
 function getMembers(){
-    const username = document.querySelector('#get-username').innerHTML;
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //const username = document.querySelector('#get-username').innerHTML;
+    //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     toggleChannelPopUpOn();
     socket.emit('getMembers',{'username':username,'project_id':project_id})
 }
@@ -792,8 +791,8 @@ function toggleChannelPopUpOff(){
 }
 
 function makeChannel(){
-    const username = document.querySelector('#get-username').innerHTML;
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //const username = document.querySelector('#get-username').innerHTML;
+    //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     name = document.querySelector("#channel-popup > input").value;
     numusers = $('.checkNames:checkbox:checked').length+1;
     console.log(numusers)
@@ -824,8 +823,8 @@ function makeChannel(){
 }
 
 socket.on('displayNewGroupRoom', json=> {
-    const username = document.querySelector('#get-username').innerHTML;
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //const username = document.querySelector('#get-username').innerHTML;
+    //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
 
     var arrayUsers = json['username_list'].split(":");
     console.log(arrayUsers)
