@@ -271,7 +271,7 @@ body {
   text-underline-position: under;
   background-color: palegoldenrod;
   letter-spacing: 1px;
-  box-shadow: -3px -3px 40px -10px currentColor;
+  box-shadow: -3px -3px 25px -10px currentColor;
 }
 
 .list-item[assigned = 'unassigned'] {

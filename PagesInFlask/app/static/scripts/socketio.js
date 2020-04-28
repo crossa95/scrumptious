@@ -15,8 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (data.username == username){
             p.setAttribute("class", "my-msg");
-            console.log(document.getElementById("main-section").scrollTop)
-            console.log(document.getElementById("main-section").scrollHeight)
             
             //username
             span_username.setAttribute("class", "my-username")
@@ -48,6 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             //Append
             document.querySelector('#display-message-section').append(p);
+            
+            height = document.getElementById("display-message-section").scrollHeight - document.getElementById("main-section").scrollTop - document.querySelector("#input-area").scrollHeight;
+            if(height < 650){
+                document.getElementById("main-section").scrollTop = document.getElementById("main-section").scrollHeight;
+            }
+            console.log(height)
+
         }
         // Display system message
 
@@ -95,6 +100,11 @@ function joinRoom(room) {
     //autofocus on textbox
     document.querySelector('#user_message').focus()
 }
+
+socket.on('scrollToBottom', json=> {
+    document.getElementById("main-section").scrollTop = document.getElementById("main-section").scrollHeight;
+    window.scrollTo(0,document.body.scrollHeight);
+})
 
 // Print System Message
 function printSysMsg(msg) {
