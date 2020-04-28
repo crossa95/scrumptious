@@ -57,7 +57,7 @@ class Card(db.Model):
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'), nullable=False)
     sprint_id = db.Column(db.Integer, default = 0)
     priority = db.Column(db.String(20), default = 'black')
-    assigned = db.Column(db.String(50))
+    assigned = db.Column(db.String(50), default = '')
     def __repr__(self):
         return f"Card('{self.title}', '{self.description}')"
 
