@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(height < 650){
                 document.getElementById("main-section").scrollTop = document.getElementById("main-section").scrollHeight;
             }
-            //console.log(height)
+            console.log(height)
 
         }
         // Display system message
