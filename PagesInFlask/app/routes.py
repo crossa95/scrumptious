@@ -149,13 +149,11 @@ def create_project(username):
     form = ProjectForm()
     if form.validate_on_submit():
         if form.picture.data:
-            print('here')
             picture_file = save_project_picture(form.picture.data)
             project = Project(title=form.title.data, description=form.description.data, image_file = picture_file)
             db.session.add(project)
             db.session.commit()
         else:
-            print('here :(')
             project = Project(title=form.title.data, description=form.description.data)
             db.session.add(project)
             db.session.commit()
@@ -314,7 +312,6 @@ def myconverter(time):
 
 @socketio.on('join')
 def join(data):
-    print(data['room'])
     join_room(data['room'])
     messages = Chat_History.query.filter_by(project_id = data['project_id'], room = data['room'] ).all()
     for msg in messages:
@@ -326,7 +323,6 @@ def join(data):
 
 @socketio.on('leave')
 def leave(data):
-    print(data['room'])
     leave_room(data['room'])
     send({'msg': data['username'] + " has left the " + data['display_name'] + " room."}, room=data['room'])
     
@@ -502,7 +498,7 @@ def createGroupMessagingRoom(json):
     project_id = json['project_id']
     room_title = json['roomName']
     user = User.query.filter_by(username = json['username']).first_or_404()
-    username_list = user.username
+    username_list = ""
     user_list = ""
     tosort = [user.id]
     for x in json['users']:
@@ -567,4 +563,55 @@ def allAssignments(json):
         for user in users_assigned:
             emit('setAssignmentOn',{'username':user,'card_id':card.id})
 
-    
+@socketio.on('getChannels')
+def getChannels(json):
+    channels = db.session.query(Channel).filter_by(project_id = json['project_id']).all()
+    user = db.session.query(User).filter_by(username = json['username']).first_or_404()
+    for channel in channels:
+        ids = channel.users.split(":")
+        if(len(ids) > 2):
+            if(str(user.id) in ids):
+                username_list = ""
+                for id in ids:
+                    if id != "":
+                        user = db.session.query(User).filter_by(id = id).first_or_404()
+                        username_list += user.username+":"
+                emit('displayNewGroupRoom',{'project_id':channel.project_id,'room_title':channel.room,'username_list':username_list})
+        else:
+            if(str(user.id) in ids):
+                username_list = ""
+                for id in ids:
+                    user = db.session.query(User).filter_by(id = id).first_or_404()
+                    username_list += user.username+":"
+                emit('displayNewDMRoom',{'project_id':channel.project_id, 'username_list':username_list,'room_id':channel.room})
+        
+        
+@socketio.on('deleteChannel')
+def deleteChannel(json):
+    channelName = json['channelName']
+    channel = db.session.query(Channel).filter_by(room = channelName, project_id = json['project_id']).first()
+    if channel != None:
+        channel_users = channel.users.split(":")
+        msgs = db.session.query(Chat_History).filter_by(room =channel.room, project_id = json['project_id']).all()
+        for msg in msgs:
+            db.session.delete(msg)
+        db.session.delete(channel)
+        db.session.commit()
+        emit('removeGroupChannelFromList',{'project_id':json['project_id'], 'channelName':channel.room}, broadcast = True)  
+    else:
+        room_title= ""
+        user = db.session.query(User).filter_by(username = json['username']).first()
+        other_user = db.session.query(User).filter_by(username =json['channelName']).first()
+        if(user.id < other_user.id):
+            room_title = str(user.id)+":"+user.username+":"+str(other_user.id)+":"+other_user.username
+        else:
+            room_title = str(other_user.id)+":"+other_user.username+":"+str(user.id)+":"+user.username
+        print(room_title)
+        channel = db.session.query(Channel).filter_by(room = room_title, project_id = json['project_id']).first()
+        msgs = db.session.query(Chat_History).filter_by(room =channel.room, project_id = json['project_id']).all()
+        for msg in msgs:
+            db.session.delete(msg)
+        db.session.delete(channel)
+        db.session.commit()
+        emit('removeDMChannelFromList',{'username':user.username, 'other_username':other_user.username,'project_id':json['project_id']},broadcast=True)
+        

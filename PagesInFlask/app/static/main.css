@@ -266,9 +266,9 @@ body {
   font-weight: bold;
   font-size: larger;
   text-shadow: -1px 0px 0 #000,0px 0px 0 #000,0px 0px 0 #000,0px 0px 0 #000;
-  text-decoration: dashed underline black;
+  /* text-decoration: dashed underline black;
   text-decoration-color: black;
-  text-underline-position: under;
+  text-underline-position: under; */
   background-color: palegoldenrod;
   letter-spacing: 1px;
   box-shadow: -3px -3px 25px -10px currentColor;
@@ -686,4 +686,29 @@ input[type=checkbox]{
 
 .assign-popup #members-check ul{
   padding-inline-start:0px;
+}
+
+.delete-channel-popup {
+  display:none;
+  position: inherit;
+  height:33px;
+  background-color:black;
+  color: red;
+  border-radius: 7px;
+  overflow-wrap: normal;
+  text-align: center;
+  margin-bottom: 0.4vh;
+
+}
+
+.delete-channel-popup .context-menu__item {
+  opacity: 0.8;
+  color:red;
+}
+
+.delete-channel-popup .context-menu__link:hover {
+  color: #fff;
+  background-color: midnightblue;
+  border-radius: 7px;
+  opacity: 1;
 }

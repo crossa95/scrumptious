@@ -1,10 +1,11 @@
 var socket = io();
-let room = document.querySelector("#sidebar > p:nth-child(2)").innerHTML;
+let room = "";
 const username = document.querySelector('#get-username').innerHTML;
 const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
 socket.emit('allAssignments',{'project_id':project_id});
+socket.emit('getChannels',{'username':username,'project_id':project_id});
+document.querySelector("#chat")
 document.addEventListener('DOMContentLoaded', () => {    
-    joinRoom(room);
     // Displays incoming messages
     socket.on('message', data => {
         
@@ -65,12 +66,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Send message
     document.querySelector('#send_message').onclick = () => {
-       
-        socket.send({'msg': document.querySelector('#user_message').value,
+        if (room != ""){
+            socket.send({'msg': document.querySelector('#user_message').value,
                     'username': username, 'room': room, 'room_displayed':room, project_id:project_id});
         
-        // Clear input area
-        document.querySelector('#user_message').value = '';
+            // Clear input area
+            document.querySelector('#user_message').value = '';
+        }
+        
     }
     navBarSetUp();
     
@@ -440,6 +443,16 @@ function menuItemListener( link ) {
             socket.emit('sprintDelete',{'project_id':project_id,'numSprints':numSprints,'sprintNum':sprintNum})
         }
     }
+    else if(link.getAttribute('data-action') == 'Delete Channel'){
+        channelName = ChannelInContext.innerText;
+        if (channelName == "General" || channelName == "Design" || channelName == "Prototype" || channelName == "Problems"){
+            alert("Cannot Delete Default Team Channels")
+        }
+        else{
+            toggleChannelDeleteMenuOff();
+            socket.emit('deleteChannel',{'username':username,'channelName':ChannelInContext.innerText,'project_id':project_id})
+        }
+    }
     else{}
     
     toggleMenuOff();
@@ -473,6 +486,9 @@ var CardInContext;
 var SprintItemClassName = "nav-link";
 var SprintInContext;
 
+var ChannelItemClassname = "select-room";
+var ChannelInContext;
+
 var menu = document.querySelector("#context-menu");
 var menuItems = menu.querySelectorAll(".context-menu__item");
 var menuState = 0;
@@ -492,6 +508,7 @@ function contextListener() {
     document.addEventListener( "contextmenu", function(e) {
       CardInContext = clickInsideElement( e, CardItemClassName );
       SprintInContext = clickInsideElement(e,SprintItemClassName);
+      ChannelInContext = clickInsideElement(e,ChannelItemClassname);
       if ( CardInContext ) {
         positionX = CardInContext.getBoundingClientRect().right;
         positionY = CardInContext.getBoundingClientRect().y;
@@ -507,11 +524,19 @@ function contextListener() {
             toggleSprintPopMenuOn();
         }
       }
+      else if(ChannelInContext){
+        e.preventDefault();
+        ChannelInContext.click();
+        document.getElementById("delete-channel-popup").setAttribute("channel",ChannelInContext.innerHTML)
+        toggleChannelDeleteMenuOn();
+      }
       else {
+        ChannelInContext = null;
         CardInContext = null;
         SprintInContext = null;
         toggleMenuOff();
         toggleSprintPopMenuOff();
+        toggleChannelDeleteMenuOff();
       }
     });
 }
@@ -523,6 +548,7 @@ function clickListener() {
         var clickEIsChannelPop = clickInsideElement(e,"channel-popup");
         var clickEIsAddChannel = clickInsideElement(e,"add-room");
         var clickEIsAssignMenu = clickInsideElement(e,"assign-popup");
+        var clickEIsChannelDelete = clickInsideElement(e,"channel-delete");
         if ( clickeElIsLink ) {
             e.preventDefault();
             menuItemListener( clickeElIsLink );
@@ -539,6 +565,9 @@ function clickListener() {
         else if (clickEIsAssignMenu){
             // do nothing
         }
+        else if (clickEIsChannelDelete){
+            // do nothing
+        }
         else {
             var button = e.which || e.button;
             if ( button === 1 ) {
@@ -547,6 +576,7 @@ function clickListener() {
             toggleChannelPopUpOff();
             toggleSprintPopMenuOff();
             closeForm();
+            toggleChannelDeleteMenuOff();
             }
         }
     });
@@ -589,6 +619,13 @@ function toggleSprintPopMenuOn(){
 }
 function toggleSprintPopMenuOff(){
     document.getElementById("sprint-pop").style.display = "none";
+}
+
+function toggleChannelDeleteMenuOn(){
+    document.getElementById("delete-channel-popup").style.display = "block";
+}
+function toggleChannelDeleteMenuOff(){
+    document.getElementById("delete-channel-popup").style.display = "none";
 }
 
 function toggleAssignPopUpOn(){
@@ -932,6 +969,43 @@ socket.on('setUserAssignmentOff', json => {
         ele_id = "card_"+String(json['card_id']);
         var element = document.getElementById(ele_id);
         element.setAttribute("assigned","off");
+    }
+})
+
+socket.on('removeDMChannelFromList', json =>{
+    if (project_id == json['project_id']){
+        channels = document.getElementsByClassName("select-room");
+        if (username == json['username']){
+            for (let i = 0; i < channels.length; i++){
+                if(channels[i].innerText == json['other_username']){
+                    channels[i].outerHTML = "";
+                    room = "";
+                    document.getElementById('display-message-section').innerHTML = '';
+                }
+            }
+        }
+        if (username == json['other_username']){
+            for (let i = 0; i < channels.length; i++){
+                if(channels[i].innerText == json['username']){
+                    channels[i].outerHTML = "";
+                    room = "";
+                    document.getElementById('display-message-section').innerHTML = '';
+                }
+            }
+        }
+    }
+})
+
+socket.on('removeGroupChannelFromList', json => {
+    if (project_id == json['project_id']){
+        channels = document.getElementsByClassName("select-room");
+        for (let i = 0; i < channels.length; i++){
+            if(channels[i].innerText == json['channelName']){
+                document.deleteElement(channels[i]);
+                room = "";
+                document.querySelector('#display-message-section').innerHTML = '';
+            }
+        }
     }
 })
 
