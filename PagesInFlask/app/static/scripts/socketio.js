@@ -15,7 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (data.username == username){
             p.setAttribute("class", "my-msg");
-
+            console.log(document.getElementById("main-section").scrollTop)
+            console.log(document.getElementById("main-section").scrollHeight)
+            
             //username
             span_username.setAttribute("class", "my-username")
             span_username.innerText = data['username'];
@@ -27,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // HTML to append
             p.innerHTML += span_username.outerHTML + br.outerHTML + data['msg'] + br.outerHTML + span_timestamp.outerHTML;
             document.querySelector('#display-message-section').append(p);
+            document.getElementById("main-section").scrollTop = document.getElementById("main-section").scrollHeight;
         }
          // Display other users' messages
          else if (typeof data.username !== 'undefined') {
