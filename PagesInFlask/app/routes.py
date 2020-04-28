@@ -32,7 +32,7 @@ def about():
 def register():
     # Check if a valid user is logged in, if one is alreayd logged in, registration form shouldn't be able to be accessed
     if current_user.is_authenticated:
-        return redirect(url_for('account'))
+        return redirect(url_for('account'))     #REDIRECTED TO ACCOUNT INSTEAD OF HOME
     form = RegistrationForm()
 
     # After it goes into register html and the user has put in their info, this code happens if everything is ok
@@ -56,7 +56,7 @@ def register():
 def login():
     # If logged in, should redirect to home instead
     if current_user.is_authenticated:
-        return redirect(url_for('account'))
+        return redirect(url_for('account'))  #REDIRECTED TO ACCOUNT INSTEAD OF HOME   
 
     #if not logged in, sees the login form
     form = LoginForm()
@@ -71,7 +71,7 @@ def login():
             # this is if someone accesses a page that they need to be logged in to access
             # it will redirect them to what they were initially wanting to go to after they log in
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('account'))
+            return redirect(next_page) if next_page else redirect(url_for('account'))    #REDIRECTED TO ACCOUNT INSTEAD OF HOME
         else:
             flash('Login Unsuccessful. Please verify that email and password are spelled correctly.', 'danger')
     return render_template('login.html', title='Login', form=form)
@@ -149,13 +149,11 @@ def create_project(username):
     form = ProjectForm()
     if form.validate_on_submit():
         if form.picture.data:
-            print('here')
             picture_file = save_project_picture(form.picture.data)
             project = Project(title=form.title.data, description=form.description.data, image_file = picture_file)
             db.session.add(project)
             db.session.commit()
         else:
-            print('here :(')
             project = Project(title=form.title.data, description=form.description.data)
             db.session.add(project)
             db.session.commit()
@@ -314,7 +312,6 @@ def myconverter(time):
 
 @socketio.on('join')
 def join(data):
-    print(data['room'])
     join_room(data['room'])
     messages = Chat_History.query.filter_by(project_id = data['project_id'], room = data['room'] ).all()
     for msg in messages:
@@ -322,10 +319,10 @@ def join(data):
         time = time.strip('"')
         send({'msg': msg.message, 'username':msg.username, 'time_stamp': time,'room':data['room']})
     send({'msg': data['username'] + " has joined the room."}, room=data['room'])
+    emit('scrollToBottom')
 
 @socketio.on('leave')
 def leave(data):
-    print(data['room'])
     leave_room(data['room'])
     send({'msg': data['username'] + " has left the " + data['display_name'] + " room."}, room=data['room'])
     
@@ -501,7 +498,7 @@ def createGroupMessagingRoom(json):
     project_id = json['project_id']
     room_title = json['roomName']
     user = User.query.filter_by(username = json['username']).first_or_404()
-    username_list = user.username
+    username_list = ""
     user_list = ""
     tosort = [user.id]
     for x in json['users']:
@@ -536,32 +533,20 @@ def assignChecks(json):
         user = db.session.query(User).filter_by(id= x).first_or_404()
         new_list.append(user.username)
         new_string += user.username +":"
-    print(new_list)
-    print(old_list)
-    print(len(new_list))
-    print(len(old_list))
-    print(new_string)
+    
     card_assigned = False
     if (len(new_list) == 0):
         emit('setAssignmentUnassigned',{'card_id':json['card_id']},broadcast=True)
     
-    print("here")
     if  (len(old_list) == 1 and len(new_list) > 0):
         emit('setAssignmentOff',{'card_id':json['card_id']},broadcast=True)
     
     if (len(new_list)>0):
         card_assigned = True    
-    print("here1")
     for x in new_list:
         if x not in old_list:
             emit('setAssignmentOn',{'username':x,'card_id':json['card_id']}, broadcast= True)
-    
-    print("here2")
     for y in old_list:
-        print(y)
-        print(y not in new_list)
-        print(y != "")
-        print(card_assigned)
         if y not in new_list and y != "" and card_assigned:
             emit('setUserAssignmentOff',{'username':y,'card_id':json['card_id']}, broadcast = True)
     card.assigned = new_string
@@ -578,4 +563,62 @@ def allAssignments(json):
         for user in users_assigned:
             emit('setAssignmentOn',{'username':user,'card_id':card.id})
 
-    
+@socketio.on('getChannels')
+def getChannels(json):
+    channels = db.session.query(Channel).filter_by(project_id = json['project_id']).all()
+    user = db.session.query(User).filter_by(username = json['username']).first_or_404()
+    my_id = str(user.id)
+    print(user.username)
+    for channel in channels:
+        print(channel.id)
+        ids = channel.users.split(":")
+        print(ids)
+        if(len(ids) > 2):
+            print(str(user.id))
+            if(my_id in ids):
+                username_list = ""
+                for id in ids:
+                    if id != "":
+                        user = db.session.query(User).filter_by(id = id).first_or_404()
+                        username_list += user.username+":"
+                print(username_list)
+                emit('displayNewGroupRoom',{'project_id':channel.project_id,'room_title':channel.room,'username_list':username_list})
+        else:
+            if(my_id in ids):
+                username_list = ""
+                for id in ids:
+                    user = db.session.query(User).filter_by(id = id).first_or_404()
+                    username_list += user.username+":"
+                emit('displayNewDMRoom',{'project_id':channel.project_id, 'username_list':username_list,'room_id':channel.room})
+        
+        
+@socketio.on('deleteChannel')
+def deleteChannel(json):
+    print(json['channelName'])
+    channelName = json['channelName']
+    channel = db.session.query(Channel).filter_by(room = channelName, project_id = json['project_id']).first()
+    if channel != None:
+        channel_users = channel.users.split(":")
+        msgs = db.session.query(Chat_History).filter_by(room =channel.room, project_id = json['project_id']).all()
+        for msg in msgs:
+            db.session.delete(msg)
+        db.session.delete(channel)
+        db.session.commit()
+        emit('removeGroupChannelFromList',{'project_id':json['project_id'], 'channelName':channel.room}, broadcast = True)  
+    else:
+        room_title= ""
+        user = db.session.query(User).filter_by(username = json['username']).first()
+        other_user = db.session.query(User).filter_by(username =json['channelName']).first()
+        if(user.id < other_user.id):
+            room_title = str(user.id)+":"+user.username+":"+str(other_user.id)+":"+other_user.username
+        else:
+            room_title = str(other_user.id)+":"+other_user.username+":"+str(user.id)+":"+user.username
+        print(room_title)
+        channel = db.session.query(Channel).filter_by(room = room_title, project_id = json['project_id']).first()
+        msgs = db.session.query(Chat_History).filter_by(room =channel.room, project_id = json['project_id']).all()
+        for msg in msgs:
+            db.session.delete(msg)
+        db.session.delete(channel)
+        db.session.commit()
+        emit('removeDMChannelFromList',{'username':user.username, 'other_username':other_user.username,'project_id':json['project_id']},broadcast=True)
+        

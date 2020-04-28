@@ -5,7 +5,7 @@
 
 {% block content %}
 
-<h4 style="padding-top: 10px;"> {{ project.title }} </h4>
+<h4 style="padding-top: 25px;"> {{ project.title }} </h4>
 <small class = "text-muted"> Created on {{ project.date_posted.strftime('%Y-%m-%d') }}</small>
 <div>
     <p> <strong>Description:</strong> {{project.description}} </p>
@@ -91,6 +91,14 @@
                     right: -4vw;
                     ">Confirm</button>
                 </div>
+                <div class="delete-channel-popup" id="delete-channel-popup" channel="">
+                    <li class="context-menu__item">
+                        <a href="#" class="context-menu__link " style="color: red;" data-action="Delete Channel">
+                            <i class="fa fa-times" style="color: red;"></i> 
+                            Delete Channel
+                        </a>
+                    </li>
+                </div>
             </nav>
             <!-- Message Area -->
             <div id = "rightside-panel">
@@ -118,13 +126,14 @@
                     font-weight: bold;
                 ">SEND</button>
             </div>
+            
         </div>                  
     </div>
     <!-- Card Board Section-->
     <div id="board" class="container tab-pane active"><br>
         <h3>Project Board</h3>
         <a href="{{ url_for('create_card', project_id=project.id, username=current_user.username)}}">
-            <button type="button" class="btn btn-dark btn-lg">Create a new card</button>
+            <button type="button" class="btn btn-dark btn-lg">Create a new card</button> <!--BUTTON MADE DARK NOT PRIMARY-->
         </a>
         <div class="container">
             <div class="sprint-popup" id="sprint-pop" sprint=0>
@@ -133,25 +142,22 @@
                 </li>
             </div>
             <ul class="nav nav-tabs" role="tablist">
-                               
-                    <!-- <a class = "nav-link active" href="#sprint_1" data-toggle="tab">Sprint 1</a> -->
                 {% for sprint in sprints %}
-                {% if sprint.sprint_num == 1 %}
-                <li class="nav-item">                   
-                    <a class = "nav-link active" href="#sprint_{{sprint.sprint_num}}" data-toggle="tab">Sprint {{sprint.sprint_num}}</a>
-                </li>
-                {% else %}
-                <li class="nav-item">                   
-                    <a class = "nav-link" href="#sprint_{{sprint.sprint_num}}" data-toggle="tab">Sprint {{sprint.sprint_num}}</a>
-                </li>
-                {% endif %}
+                    {% if sprint.sprint_num == 1 %}
+                    <li class="nav-item">                   
+                        <a class = "nav-link active" href="#sprint_{{sprint.sprint_num}}" data-toggle="tab">Sprint {{sprint.sprint_num}}</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">                   
+                        <a class = "nav-link" href="#sprint_{{sprint.sprint_num}}" data-toggle="tab">Sprint {{sprint.sprint_num}}</a>
+                    </li>
+                    {% endif %}
                 {% endfor %}
-                
                 <li class = "nav-item">
                     <a href="#" class="add-contact nav-link">+ Add Sprint</a>
                 </li>
             </ul>
-
+            
             <div class = "lists" for="backlog">  <!-- Moved this so the backlog is persistant across all tab panes -->
                 <div class = "list" for='backlog' id="backlog_1">
                     <h9 style="text-align:center">Backlog</h9>
@@ -216,6 +222,22 @@
                 
             </div>
         </div>
+    </div>
+    <div class="assign-popup" id="assign-popup" card=0>
+        <div id="members-check">
+            <ul>    
+    
+            </ul>
+        </div>
+        
+        <button class="btn" onclick="assignChecks()" style="
+        font-weight: bold;
+        border: 2px solid black;
+        background-color: darkorange;
+        padding-left: 11px;
+        position: relative;
+        right: -2vw;
+        ">Assign Card</button>
     </div>
 </div>
 
@@ -351,13 +373,10 @@ for (let i = 0; i<list_items.length; i++){
 <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
 <!-- Custom Chat JS -->
 <script src="{{ url_for('static', filename='scripts/chat_page.js')}}"></script>
-
-
 <!-- Custom SocketIO JS -->
 <script src="{{url_for('static', filename='scripts/socketio.js')}}"></script>
 
 <!-- Font Awesome JS -->
 <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
 <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
-
 {% endblock content %}

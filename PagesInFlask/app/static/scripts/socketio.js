@@ -1,10 +1,11 @@
 var socket = io();
-let room = document.querySelector("#sidebar > p:nth-child(2)").innerHTML;
+let room = "";
 const username = document.querySelector('#get-username').innerHTML;
 const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
 socket.emit('allAssignments',{'project_id':project_id});
+socket.emit('getChannels',{'username':username,'project_id':project_id});
+document.querySelector("#chat")
 document.addEventListener('DOMContentLoaded', () => {    
-    joinRoom(room);
     // Displays incoming messages
     socket.on('message', data => {
         
@@ -15,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (data.username == username){
             p.setAttribute("class", "my-msg");
-
+            
             //username
             span_username.setAttribute("class", "my-username")
             span_username.innerText = data['username'];
@@ -27,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // HTML to append
             p.innerHTML += span_username.outerHTML + br.outerHTML + data['msg'] + br.outerHTML + span_timestamp.outerHTML;
             document.querySelector('#display-message-section').append(p);
+            document.getElementById("main-section").scrollTop = document.getElementById("main-section").scrollHeight;
         }
          // Display other users' messages
          else if (typeof data.username !== 'undefined') {
@@ -45,6 +47,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             //Append
             document.querySelector('#display-message-section').append(p);
+            
+            height = document.getElementById("display-message-section").scrollHeight - document.getElementById("main-section").scrollTop - document.querySelector("#input-area").scrollHeight;
+            if(height < 650){
+                document.getElementById("main-section").scrollTop = document.getElementById("main-section").scrollHeight;
+            }
+            //console.log(height)
+
         }
         // Display system message
 
@@ -57,12 +66,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Send message
     document.querySelector('#send_message').onclick = () => {
-       
-        socket.send({'msg': document.querySelector('#user_message').value,
+        if (room != ""){
+            socket.send({'msg': document.querySelector('#user_message').value,
                     'username': username, 'room': room, 'room_displayed':room, project_id:project_id});
         
-        // Clear input area
-        document.querySelector('#user_message').value = '';
+            // Clear input area
+            document.querySelector('#user_message').value = '';
+        }
+        
     }
     navBarSetUp();
     
@@ -70,14 +81,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Leave room
 function leaveRoom(room) {
+    channels=document.getElementsByClassName("select-room");
+    for(let i = 0; i<channels.length; i++){
+        if (channels[i].hasAttribute("room_id")){
+            if (channels[i].getAttribute("room_id") == room){
+                channels[i].setAttribute("selected", false);
+            }
+        }
+        else{
+            if (channels[i].innerHTML == room){
+                channels[i].setAttribute("selected", false);
+            }
+        }
+    }
     rooms = document.querySelectorAll('.select-room').forEach(p =>{
         if (p.innerHTML == room){
+            
             if (p.hasAttribute("room_id")){
                 socket.emit('leave', {'username': username, 'room': p.getAttribute("room_id"),'display_name':p.innerHTML , project_id:project_id})
             }
             else{
                 socket.emit('leave', {'username': username, 'room': room , 'display_name':room,project_id:project_id})
             }
+            
         }
     })
 }
@@ -86,12 +112,29 @@ function leaveRoom(room) {
 function joinRoom(room) {
     socket.emit('join', {'username': username, 'room': room, project_id:project_id})
     
-    
+    channels=document.getElementsByClassName("select-room");
+    for(let i = 0; i<channels.length; i++){
+        if (channels[i].hasAttribute("room_id")){
+            if (channels[i].getAttribute("room_id") == room){
+                channels[i].setAttribute("selected", true);
+            }
+        }
+        else{
+            if (channels[i].innerHTML == room){
+                channels[i].setAttribute("selected", true);
+            }
+        }
+    }
     // Clear message area
     document.querySelector('#display-message-section').innerHTML = ''
     //autofocus on textbox
     document.querySelector('#user_message').focus()
 }
+
+socket.on('scrollToBottom', json=> {
+    document.getElementById("main-section").scrollTop = document.getElementById("main-section").scrollHeight;
+    window.scrollTo(0,document.body.scrollHeight);
+})
 
 // Print System Message
 function printSysMsg(msg) {
@@ -152,7 +195,7 @@ socket.on('cardPriority', json => {
 })
 
 socket.on('cardCreate', json => {
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     if (json['project_id'] == project_id){
         ele_id = "card_"+String(json["card_id"])
         element = document.createElement("div");
@@ -187,7 +230,7 @@ socket.on('cardCreate', json => {
 })
 
 socket.on('sprintCreate', json => {
-    project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     if (json['project_id'] == project_id){
         nav =  document.querySelector("#board > div > ul");
         newSprint = document.createElement("li");
@@ -295,7 +338,6 @@ socket.on('sprintCreate', json => {
     });
 
 socket.on('deleteSprint', json =>{
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     if(json['project_id'] == project_id){
         $( "a" ).each(function() {
             if(this.innerText == json['id']){
@@ -330,7 +372,7 @@ socket.on('deleteSprint', json =>{
 });
 
 socket.on('sprintDecrement', json =>{
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     console.log(json["id"])
     console.log(json['new_id'])
     if(json['project_id'] == project_id){
@@ -423,8 +465,18 @@ function menuItemListener( link ) {
         sprintNum = SprintInContext.innerText.replace("Sprint ","");
         numSprints = $(".nav-tabs").children().length - 1;
         if (numSprints != 1){
-            const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+            //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
             socket.emit('sprintDelete',{'project_id':project_id,'numSprints':numSprints,'sprintNum':sprintNum})
+        }
+    }
+    else if(link.getAttribute('data-action') == 'Delete Channel'){
+        channelName = ChannelInContext.innerText;
+        if (channelName == "General" || channelName == "Design" || channelName == "Prototype" || channelName == "Problems"){
+            alert("Cannot Delete Default Team Channels")
+        }
+        else{
+            toggleChannelDeleteMenuOff();
+            socket.emit('deleteChannel',{'username':username,'channelName':ChannelInContext.innerText,'project_id':project_id})
         }
     }
     else{}
@@ -460,6 +512,9 @@ var CardInContext;
 var SprintItemClassName = "nav-link";
 var SprintInContext;
 
+var ChannelItemClassname = "select-room";
+var ChannelInContext;
+
 var menu = document.querySelector("#context-menu");
 var menuItems = menu.querySelectorAll(".context-menu__item");
 var menuState = 0;
@@ -479,6 +534,7 @@ function contextListener() {
     document.addEventListener( "contextmenu", function(e) {
       CardInContext = clickInsideElement( e, CardItemClassName );
       SprintInContext = clickInsideElement(e,SprintItemClassName);
+      ChannelInContext = clickInsideElement(e,ChannelItemClassname);
       if ( CardInContext ) {
         positionX = CardInContext.getBoundingClientRect().right;
         positionY = CardInContext.getBoundingClientRect().y;
@@ -494,11 +550,19 @@ function contextListener() {
             toggleSprintPopMenuOn();
         }
       }
+      else if(ChannelInContext){
+        e.preventDefault();
+        ChannelInContext.click();
+        document.getElementById("delete-channel-popup").setAttribute("channel",ChannelInContext.innerHTML)
+        toggleChannelDeleteMenuOn();
+      }
       else {
+        ChannelInContext = null;
         CardInContext = null;
         SprintInContext = null;
         toggleMenuOff();
         toggleSprintPopMenuOff();
+        toggleChannelDeleteMenuOff();
       }
     });
 }
@@ -510,6 +574,7 @@ function clickListener() {
         var clickEIsChannelPop = clickInsideElement(e,"channel-popup");
         var clickEIsAddChannel = clickInsideElement(e,"add-room");
         var clickEIsAssignMenu = clickInsideElement(e,"assign-popup");
+        var clickEIsChannelDelete = clickInsideElement(e,"channel-delete");
         if ( clickeElIsLink ) {
             e.preventDefault();
             menuItemListener( clickeElIsLink );
@@ -526,6 +591,9 @@ function clickListener() {
         else if (clickEIsAssignMenu){
             // do nothing
         }
+        else if (clickEIsChannelDelete){
+            // do nothing
+        }
         else {
             var button = e.which || e.button;
             if ( button === 1 ) {
@@ -534,6 +602,7 @@ function clickListener() {
             toggleChannelPopUpOff();
             toggleSprintPopMenuOff();
             closeForm();
+            toggleChannelDeleteMenuOff();
             }
         }
     });
@@ -578,6 +647,13 @@ function toggleSprintPopMenuOff(){
     document.getElementById("sprint-pop").style.display = "none";
 }
 
+function toggleChannelDeleteMenuOn(){
+    document.getElementById("delete-channel-popup").style.display = "block";
+}
+function toggleChannelDeleteMenuOff(){
+    document.getElementById("delete-channel-popup").style.display = "none";
+}
+
 function toggleAssignPopUpOn(){
     document.getElementById("assign-popup").style.display = "block";
 }
@@ -588,8 +664,8 @@ function toggleAssignPopUpOff(){
 }
 
 function getAllMembers(){
-    const username = document.querySelector('#get-username').innerHTML;
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //const username = document.querySelector('#get-username').innerHTML;
+    //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     if (document.getElementById("assign-popup").style.display == "block"){
         toggleAssignPopUpOff();
     }
@@ -598,8 +674,8 @@ function getAllMembers(){
 }
 
 function getMembers(){
-    const username = document.querySelector('#get-username').innerHTML;
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //const username = document.querySelector('#get-username').innerHTML;
+    //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     toggleChannelPopUpOn();
     socket.emit('getMembers',{'username':username,'project_id':project_id})
 }
@@ -715,8 +791,8 @@ function toggleChannelPopUpOff(){
 }
 
 function makeChannel(){
-    const username = document.querySelector('#get-username').innerHTML;
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //const username = document.querySelector('#get-username').innerHTML;
+    //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
     name = document.querySelector("#channel-popup > input").value;
     numusers = $('.checkNames:checkbox:checked').length+1;
     console.log(numusers)
@@ -747,8 +823,8 @@ function makeChannel(){
 }
 
 socket.on('displayNewGroupRoom', json=> {
-    const username = document.querySelector('#get-username').innerHTML;
-    const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    //const username = document.querySelector('#get-username').innerHTML;
+    //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
 
     var arrayUsers = json['username_list'].split(":");
     console.log(arrayUsers)
@@ -919,6 +995,43 @@ socket.on('setUserAssignmentOff', json => {
         ele_id = "card_"+String(json['card_id']);
         var element = document.getElementById(ele_id);
         element.setAttribute("assigned","off");
+    }
+})
+
+socket.on('removeDMChannelFromList', json =>{
+    if (project_id == json['project_id']){
+        channels = document.getElementsByClassName("select-room");
+        if (username == json['username']){
+            for (let i = 0; i < channels.length; i++){
+                if(channels[i].innerText == json['other_username']){
+                    channels[i].outerHTML = "";
+                    room = "";
+                    document.getElementById('display-message-section').innerHTML = '';
+                }
+            }
+        }
+        if (username == json['other_username']){
+            for (let i = 0; i < channels.length; i++){
+                if(channels[i].innerText == json['username']){
+                    channels[i].outerHTML = "";
+                    room = "";
+                    document.getElementById('display-message-section').innerHTML = '';
+                }
+            }
+        }
+    }
+})
+
+socket.on('removeGroupChannelFromList', json => {
+    if (project_id == json['project_id']){
+        channels = document.getElementsByClassName("select-room");
+        for (let i = 0; i < channels.length; i++){
+            if(channels[i].innerText == json['channelName']){
+                channels[i].outerHTML = "";
+                room = "";
+                document.querySelector('#display-message-section').innerHTML = '';
+            }
+        }
     }
 })
 

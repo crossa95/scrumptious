@@ -3,7 +3,7 @@
 {% block title %} Home {% endblock title %}
 
 {% block content %}
-<head>
+  <head>
     <title>Bootstrap Example</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,10 +21,10 @@
   </head>
   <body>
     <div style="padding-top: 7em;">
-      <h1 align = "center"> 
+      <h1 style="text-align: center;"> 
         <img src="{{url_for('static', filename='layout_pics/Logo1.2.2.png')}}" width="225" height="150">
         WELCOME TO PMT 
-        <h4 align = "center"> <i>A Project Management Tool for Software Developers</i></h3>
+        <h4 style="text-align: center;"> <i>A Project Management Tool for Software Developers</i></h3>
       </h1>
       <hr>
       <h3 style="margin-left:75px;">What is it?</h3>
