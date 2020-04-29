@@ -1,0 +1,7 @@
+flask
+flask-mysqldb
+flask-cors
+pyyaml
+mysql-connector
+vue
+optional (venv)
