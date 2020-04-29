@@ -118,6 +118,7 @@
 }
 .nav-tabs .nav-link.active{
   background-color: #ecf3ff;
+  border-color: #dee2e6 #dee2e6 #ecf3ff;
 }
 
 .nav-pills .nav-link:not(.active) {
