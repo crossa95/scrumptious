@@ -4,8 +4,10 @@
 
 {% block content %}
 
-  <h1>List of Projects by {{ user.username }}</h1>
-  <a href="{{ url_for('create_project', username=current_user.username)}}"><button type="button" class="btn btn-primary btn-lg">Create a New Project</button></a>
+  <h1 style="padding-top: 25px;">List of Projects by {{ user.username }}</h1>
+  <a href="{{ url_for('create_project', username=current_user.username)}}">
+    <button type="button" class="btn btn-dark btn-lg">Create a New Project</button> <!--BUTTON MADE DARK NOT PRIMARY-->
+  </a>
   <div class="container">
     <div class="row">
       {% for project in projects %}
@@ -17,7 +19,7 @@
 
             <small class = "text-muted"> Created on {{ project.date_posted.strftime('%Y-%m-%d') }}</small>
             <p class="card-text">   {{ project.description }} </p>
-            <a href="{{ url_for('project', project_id=project.id, username=current_user.username)}}" class="btn btn-primary">Go to Project</a>
+            <a href="{{ url_for('project', project_id=project.id, username=current_user.username)}}" class="btn btn-secondary">Go to Project</a>  <!--BUTTON MADE DARK NOT PRIMARY-->
           </div>
         </div>
       </div>
