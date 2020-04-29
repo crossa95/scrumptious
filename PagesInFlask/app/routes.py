@@ -56,11 +56,7 @@ def register():
 def login():
     # If logged in, should redirect to home instead
     if current_user.is_authenticated:
-<<<<<<< HEAD
-        return redirect(url_for('home'))
-=======
         return redirect(url_for('home')) 
->>>>>>> Cosmetic
 
     #if not logged in, sees the login form
     form = LoginForm()
