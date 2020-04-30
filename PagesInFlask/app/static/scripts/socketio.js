@@ -231,11 +231,13 @@ socket.on('cardCreate', json => {
 
 socket.on('sprintCreate', json => {
     //project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
+    console.log(username)
+    console.log(json['username'])
     if (json['project_id'] == project_id){
         nav =  document.querySelector("#board > div > ul");
         newSprint = document.createElement("li");
         newSprint.className = "nav-item";
-        string1 = '<a class = "nav-link" href="#sprint_"'+json['sprint_id']+' data-toggle="tab" >Sprint '+json['sprint_id']+'</a></li>'
+        string1 = '<a class = "nav-link" href="#sprint_'+json['sprint_id']+'" data-toggle="tab" >Sprint '+json['sprint_id']+'</a></li>'
         newSprint.innerHTML = string1;
 
         if (newSprint.innerText != document.querySelector("#board > div > ul").lastElementChild.previousElementSibling.innerText){
@@ -253,6 +255,7 @@ socket.on('sprintCreate', json => {
             '</div>';
             newContent.innerHTML = string2;
             document.querySelector("#board > div > div.tab-content").append(newContent);
+            
             }
             newSprint.addEventListener("click", function () {
                 oldactive = document.getElementsByClassName("tab-pane active")[1];
@@ -335,6 +338,7 @@ socket.on('sprintCreate', json => {
                 });
             }
         }
+    
     });
 
 socket.on('deleteSprint', json =>{
@@ -344,6 +348,22 @@ socket.on('deleteSprint', json =>{
                 if (this.className == "nav-link active"){
                     this.parentElement.remove();
                     this.remove();
+                    console.log(json['sprint_num'])
+                    sprnum = "sprint_"+String(json['sprint_num']);
+                    panes = document.getElementsByClassName("tab-pane");
+                    for (let i = 0; i < panes.length; i++){
+                        pane_id = panes[i].id;
+                        console.log(panes[i])
+                        pane_id = parseInt(pane_id.replace("sprint_",""));
+                        console.log(pane_id)
+                        if (pane_id == json['sprint_num']){
+                            panes[i].outerHTML = "";
+                        }
+                        if (pane_id > json['sprint_num']){
+                            panes[i].id = "sprint_"+String(pane_id-1);
+                        }
+
+                    }
                     if (json['id'] == "Sprint 1"){
                         $( "a" ).each(function(){
                             if(this.innerText.includes("Sprint 2")){
@@ -471,7 +491,7 @@ function menuItemListener( link ) {
         numSprints = $(".nav-tabs").children().length - 1;
         if (numSprints != 1){
             //const project_id = parseInt(document.querySelector('#get-project_id').innerHTML);
-            socket.emit('sprintDelete',{'project_id':project_id,'numSprints':numSprints,'sprintNum':sprintNum})
+            socket.emit('sprintDelete',{'project_id':project_id,'numSprints':numSprints,'sprintNum':sprintNum,'username':username})
         }
     }
     else if(link.getAttribute('data-action') == 'Delete Channel'){

@@ -287,10 +287,10 @@
 $('.add-contact').click(function (e) {
     e.preventDefault();
     var id = $(".nav-tabs").children().length; //think about it ;)
-    var tabId = 'contact_' + id;
+    /* var tabId = 'contact_' + id;
     $(this).closest('li').before('<li class ="nav-item"><a class = "nav-link" href="#sprint_' +
-                                     id + '" data-toggle="tab" >Sprint ' + id + '</a></li>');
-    $('.tab-content').append(
+                                     id + '" data-toggle="tab" >Sprint ' + id + '</a></li>'); */
+    /* $('.tab-content').append(
             '<div class="tab-pane" id="sprint_' + id + '">' +
                 '<div class = "lists">' +
                     '<div class = "list" for="In Progress" id=ip_' + id + '>' +
@@ -301,8 +301,8 @@ $('.add-contact').click(function (e) {
                     '</div>' +
                 '</div>' +
             '</div>');
-   $('.nav-tabs li:nth-child(' + id + ') a').click();
-   socket.emit('addSprint', {id:'{{project.id}}', sprint: id})
+   $('.nav-tabs li:nth-child(' + id + ') a').click(); */
+   socket.emit('addSprint', {id:'{{project.id}}', sprint: id,username:username})
 });
 
 const list_items = document.querySelectorAll('.list-item');

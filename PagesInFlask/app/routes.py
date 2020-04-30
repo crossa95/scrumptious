@@ -349,7 +349,7 @@ def addSprint(json):
     db.session.add(toAdd)
     db.session.commit()
     print(json["sprint"])
-    emit('sprintCreate', {'sprint_id' : json["sprint"], 'project_id' : json["id"]}, broadcast = True) 
+    emit('sprintCreate', {'sprint_id' : json["sprint"], 'project_id' : json["id"],'username':json['username']}, broadcast = True) 
     
 @socketio.on('cardClick')
 def cardClick(json):
@@ -433,7 +433,7 @@ def sprintDelete(json):
             db.session.delete(spr)
             db.session.commit()
             sprintID = 'Sprint '+str(json['sprintNum'])
-            emit('deleteSprint',{'id':sprintID,'project_id':json['project_id']},broadcast = True)
+            emit('deleteSprint',{'id':sprintID,'project_id':json['project_id'],'sprint_num':spr.sprint_num, 'username':json['username']},broadcast = True)
         if spr.sprint_num > int(json['sprintNum']):
             cards_in_sprint = db.session.query(Card).filter_by(sprint_id=spr.sprint_num,project_id=json['project_id']).all()
             for card in cards_in_sprint:
