@@ -378,7 +378,12 @@ socket.on('sprintDecrement', json =>{
     if(json['project_id'] == project_id){
         $( "a" ).each(function() {
             if(this.innerText == json['id']){
-                this.innerText = json['new_id'] 
+                this.innerText = json['new_id'];
+                href = this.getAttribute("href");
+                href_num = href.replace("#sprint_","");
+                new_num = parseInt(href_num) - 1;
+                new_href = "#sprint_" + String(new_num);
+                this.setAttribute("href",new_href);
             }
           });
     }
