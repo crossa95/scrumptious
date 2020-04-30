@@ -343,27 +343,34 @@ socket.on('sprintCreate', json => {
 
 socket.on('deleteSprint', json =>{
     if(json['project_id'] == project_id){
+        console.log(json['sprint_num'])
+        sprnum = "sprint_"+String(json['sprint_num']);
+        panes = document.getElementsByClassName("tab-pane");
+        num = panes.length;
+        for (let i = 0; i < num; i++){
+            
+            console.log(panes[i])
+            console.log(panes[i].id)
+            pane_id = panes[i].id;
+            pane_id = parseInt(pane_id.replace("sprint_",""));
+            console.log(pane_id)
+            if (pane_id == json['sprint_num']){
+                panes[i].outerHTML = "";
+                i = i - 1;
+                num = num -1;
+            }
+            if (pane_id > json['sprint_num']){
+                console.log(pane_id)
+                panes[i].id = "sprint_"+String(pane_id-1);
+            }
+
+        }
         $( "a" ).each(function() {
             if(this.innerText == json['id']){
                 if (this.className == "nav-link active"){
                     this.parentElement.remove();
                     this.remove();
-                    console.log(json['sprint_num'])
-                    sprnum = "sprint_"+String(json['sprint_num']);
-                    panes = document.getElementsByClassName("tab-pane");
-                    for (let i = 0; i < panes.length; i++){
-                        pane_id = panes[i].id;
-                        console.log(panes[i])
-                        pane_id = parseInt(pane_id.replace("sprint_",""));
-                        console.log(pane_id)
-                        if (pane_id == json['sprint_num']){
-                            panes[i].outerHTML = "";
-                        }
-                        if (pane_id > json['sprint_num']){
-                            panes[i].id = "sprint_"+String(pane_id-1);
-                        }
-
-                    }
+                   
                     if (json['id'] == "Sprint 1"){
                         $( "a" ).each(function(){
                             if(this.innerText.includes("Sprint 2")){
