@@ -235,7 +235,7 @@ socket.on('sprintCreate', json => {
         nav =  document.querySelector("#board > div > ul");
         newSprint = document.createElement("li");
         newSprint.className = "nav-item";
-        string1 = '<a class = "nav-link" href="#sprint_"'+json['sprint_id']+' data-toggle="tab" >Sprint '+json['sprint_id']+'</a></li>'
+        string1 = '<a class = "nav-link" href="#sprint_'+json['sprint_id']+'" data-toggle="tab" >Sprint '+json['sprint_id']+'</a></li>'
         newSprint.innerHTML = string1;
 
         if (newSprint.innerText != document.querySelector("#board > div > ul").lastElementChild.previousElementSibling.innerText){
@@ -379,7 +379,13 @@ socket.on('sprintDecrement', json =>{
         $( "a" ).each(function() {
             if(this.innerText == json['id']){
                 this.innerText = json['new_id'] 
-            }
+            	href = this.getAttribute("href");
+		href = href.replace("#sprint_","");
+		href_num = parseInt(href);
+		new_num = href_num - 1;
+		new_href = "#sprint_"+String(new_num);
+		this.setAttribute("href", new_href);
+	    }
           });
     }
 })

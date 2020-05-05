@@ -318,7 +318,7 @@
   width: 100%;
   background-color: #bfe7ff;
   border-radius: 4vh;
-  max-height: 78vh;
+  max-height: 90vh;
 }
 
 #sidebar {
@@ -652,7 +652,7 @@ input[type=checkbox]{
   border: 3px solid #f1f1f1;
   z-index: 14;
   max-width: 40vw;
-  max-height:40vw;
+  max-height:75vh;
   overflow:auto;
   padding: 10px;
   background-color: white;
@@ -679,7 +679,7 @@ input[type=checkbox]{
   border: 3px solid #f1f1f1;
   z-index: 14;
   width: 175px;
-  max-height:50vh;
+  max-height:75vh;
   overflow:auto;
   padding: 10px;
   background-color: white;
