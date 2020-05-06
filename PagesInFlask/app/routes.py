@@ -298,7 +298,6 @@ def invite(project_id, username):
 # These are the socket functions for joining/leaving rooms and sending messages
 @socketio.on('message')
 def message(data):
-    print(f"\n\n{data}\n\n")
     message = Chat_History(message=data['msg'],username = data['username'],room =data['room'], project_id = data['project_id'])
     db.session.add(message)
     db.session.commit()
@@ -348,7 +347,6 @@ def addSprint(json):
     toAdd = Sprint(project_id=json["id"], sprint_num = json["sprint"])
     db.session.add(toAdd)
     db.session.commit()
-    print(json["sprint"])
     emit('sprintCreate', {'sprint_id' : json["sprint"], 'project_id' : json["id"]}, broadcast = True) 
     
 @socketio.on('cardClick')
@@ -371,18 +369,12 @@ def cardEdit(json):
     old_description = card.description
     new_title = json['new_title']
     new_description = json['new_description']
-    print(old_title)
-    print(new_title)
-    print(old_description)
-    print(new_description)
-    print(not new_title)
     if new_title:
         if new_description:
             if old_title != new_title or old_description != new_description:
                 card.title = new_title
                 card.description = new_description
                 db.session.commit()
-                print('here')
                 emit('cardEdit',{'card_id':card.id,'new_title':new_title,'new_description':new_description,'old_title':old_title,'old_description':old_description}, broadcast = True)
 
 @socketio.on('cardDelete')
@@ -415,7 +407,6 @@ def cardInfo(json):
 def cardAssignments(json):
     card = db.session.query(Card).filter_by(id=json['card_id']).first_or_404()
     info = card.assigned
-    print(info)
     emit('cardAssigned',{'assigned':info,'card_id':json['card_id']})
 
 @socketio.on('sprintDelete')
@@ -503,14 +494,11 @@ def createGroupMessagingRoom(json):
     tosort = [user.id]
     for x in json['users']:
         tosort.append(int(x))
-    print(tosort)
     mylist = sorted(tosort)
-    print(mylist)
     for user in mylist:
         user_list += ":"+str(user)
         user = User.query.filter_by(id = user).first_or_404()
-        username_list += ":"+user.username
-        print(username_list)
+        username_list += ":"+user.username)
     duplicate = db.session.query(Channel).filter_by(room = room_title,users = user_list).first()
     if duplicate == None:
         new_room = Channel(project_id=project_id,room=room_title,users = user_list)
@@ -568,20 +556,15 @@ def getChannels(json):
     channels = db.session.query(Channel).filter_by(project_id = json['project_id']).all()
     user = db.session.query(User).filter_by(username = json['username']).first_or_404()
     my_id = str(user.id)
-    print(user.username)
     for channel in channels:
-        print(channel.id)
         ids = channel.users.split(":")
-        print(ids)
         if(len(ids) > 2):
-            print(str(user.id))
             if(my_id in ids):
                 username_list = ""
                 for id in ids:
                     if id != "":
                         user = db.session.query(User).filter_by(id = id).first_or_404()
                         username_list += user.username+":"
-                print(username_list)
                 emit('displayNewGroupRoom',{'project_id':channel.project_id,'room_title':channel.room,'username_list':username_list})
         else:
             if(my_id in ids):
@@ -594,7 +577,6 @@ def getChannels(json):
         
 @socketio.on('deleteChannel')
 def deleteChannel(json):
-    print(json['channelName'])
     channelName = json['channelName']
     channel = db.session.query(Channel).filter_by(room = channelName, project_id = json['project_id']).first()
     if channel != None:
@@ -613,7 +595,6 @@ def deleteChannel(json):
             room_title = str(user.id)+":"+user.username+":"+str(other_user.id)+":"+other_user.username
         else:
             room_title = str(other_user.id)+":"+other_user.username+":"+str(user.id)+":"+user.username
-        print(room_title)
         channel = db.session.query(Channel).filter_by(room = room_title, project_id = json['project_id']).first()
         msgs = db.session.query(Chat_History).filter_by(room =channel.room, project_id = json['project_id']).all()
         for msg in msgs:
