@@ -498,7 +498,7 @@ def createGroupMessagingRoom(json):
     for user in mylist:
         user_list += ":"+str(user)
         user = User.query.filter_by(id = user).first_or_404()
-        username_list += ":"+user.username)
+        username_list += ":"+user.username
     duplicate = db.session.query(Channel).filter_by(room = room_title,users = user_list).first()
     if duplicate == None:
         new_room = Channel(project_id=project_id,room=room_title,users = user_list)
